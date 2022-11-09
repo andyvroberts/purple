@@ -5,13 +5,13 @@ Take an input CSV file of land registry paid prices and group the data by:
 - REQ 2: Property within Postcode
 - REQ 3: Date and Price of each Property
 
-It should be possible to query the re-shaped data by postcode to see the history of all prices for all properties within that postcode.  Note, in the UK, a postcode usually equates to a single street (although not always in sparsley populated areas).
+It should be possible to query the re-shaped data by postcode to see the history of all prices for all properties within that postcode.  Note, in the UK, a postcode usually equates to a single street (although not always in sparsley or very densely populated areas).
 
 ## Non-Functional
 The implementation should be able to execute fully within an Azure environment.  Within this, the following are desired:
 - NFR1: Low cost PaaS components should be used (serverless / no-ops)
 - NFR2: Complexity should be reduced to a reasonable minimum, although achieving this should not override NFR1.
-- NFR3: Data Egress costs should be minimised (ingress is usuall free) as the asusmption is that reads will far exceed writes.
+- NFR3: Data Egress costs should be minimised (ingress is usually free) as the asusmption is that reads will far exceed writes.
 - NFR4: The 'latest' land registry CSV file contains approx. 100,000 records, although this process should cater for an annual file (approx. 1 million rows).
 
 # Design
@@ -23,7 +23,7 @@ The implementation should be able to execute fully within an Azure environment. 
 | NFR1 | Function | low-cost serverless compute (free montly executions) |
 | NFR2 | Queue Storage | use as an intermediate store (functions are too limited for large memory grouping/sorting operations) |
 | NFR3 | Blob File | groups many property prices and the hierarchical document structure de-duplicates data |
-| NFR4 | Function | could possibly scale by multiple executions but cannot multi-thread or parallel process due to small resource size |
+| NFR4 | Function | could possibly scale by multiple executions but cannot multi-thread or parallel process within a single function due to small resource size |
   
 Create a single python function app, with a timer trigger, to stream read the land registry CSV file, and write each property record to queue storage specifically associated to single postcode.  
 
@@ -40,10 +40,16 @@ Function App processing steps:
 - Store decoded record to queue
   
 ### Update 1
-Creating queues by postcode results in over 100,000 queue creation requests.  Because of this, two test executions timed-out after 30 minutes.  Therefore, change the queue granularity to be the outcode (the first half of a postcode).  
+Creating queues by postcode results in over 100,000 queue creation requests.  Because of this, two test executions timed-out locally after 30 minutes (Azure consumption plan time-out is 5 minutes).  Therefore, change the queue granularity to be the outcode (the first half of a postcode).  
 Some outcodes are only 2 characters long.  This makes them impossible to create as a Queue (minimum name length = 3 characters), so append the prefix "landreg-" to each queue name.   
 
 ### Update 2
 The resulting outcode process creates approximately 2,300 queues.  
 Execution times across three tests for just queue creation averaged 7 minutes.
 However, execution times including message insert always exceed the funciton app time-out after 30 minutes. 
+
+The next option is to split our workload into much smaller units that can each run within under 5 minutes.  Firstly, try to load a single outcode of price records into a queue.  Choose the outcode with the largest number of records in the file, and run locally.  
+In the monthly update file, outcode **B5** has 257 records.
+In the yearly 2019 file, outcode **CR0** has 2,133 records.
+
+### Update 3

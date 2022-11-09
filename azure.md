@@ -6,7 +6,7 @@ To prepare our linux environment, we will install and/or configure the following
 
 
 ## 1. Dotnet
-See the main doc pages to make sure instructions are current.  Add the microsoft package referneces to apt so the install work.   
+See the main doc pages to make sure instructions are current.  Add the microsoft package references to apt so the install will work.   
   
 https://docs.microsoft.com/en-us/dotnet/core/install/linux
 
@@ -49,19 +49,17 @@ https://docs.microsoft.com/en-us/dotnet/core/tools/dotnet-new
 As always, read the docs first.  
 https://learn.microsoft.com/en-us/cli/azure/install-azure-cli-linux?pivots=apt
 
-Download and the run the single command script.
+Download and the run the Debian single command script.
 ```
 curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
 ```
-Or use pip. see the python doc file if you need to install pip ([python.md](python.md)).
-```
-py -m pip install --user azure-cli
-```
+Note: It is possible to install the CLi using PIP.  However, I have had issues with some CLI commands using this approach.  I recommend only using the Debian install script.  
+
 Then test it exists and logon using your account.  
-Note: If you have MFA on your Azure account, you should login with your tenant id. First create an env variable TENANT="<your_id>"  
+Note: If you have MFA on your Azure account, you should login with your tenant id. First create an env variable "export mytenant=<your_id>"  
 ```
 az --version
-az login --tenant $TENANT
+az login --tenant $mytenant
 az account show
 ```
 
@@ -77,7 +75,7 @@ https://docs.microsoft.com/en-us/azure/azure-functions/functions-run-local?tabs=
 Keep track of the runtime versions and their compatibilities.  
 https://docs.microsoft.com/en-us/azure/azure-functions/functions-versions
 
-The MS docs currently say this is only valid for debian 9 or 10, but it also works for version 11.  To prepare for installation:
+The MS docs currently say this is only valid for Debian 9 or 10, but it also works for version 11.  To prepare for installation:
 ```
 # set to 9 or 10 in the docs.microsoft pages!
 DEBIAN_VERSION=11

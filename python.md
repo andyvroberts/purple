@@ -26,14 +26,14 @@ Read the docs
 https://learn.microsoft.com/en-us/azure/azure-functions/functions-reference-python?tabs=asgi%2Capplication-level  
 
 At this time (October 22), the Functions App Python programming model is **V1**.  
-It is possible to use the V2 preview, but in this case we are not using V2.  #
+It is possible to use the V2 preview, but in this case we are not using V2.  
 
 Pay attention to:
 1. you must generate a python requirements.txt before publishing the function app to Azure
 2. each function is a directory
 3. you can use another (non-function) directory as a module for shared code
 4. you should re-set the PYTHONPATH to the project root directory (in this example, 'purple')
-5. the project root directdory should contain the tests folder.
+5. the project root directory should contain the tests folder.
 6. make sure you are on a supported Python version, as these are what Azure will use (in Oct 22, function v4.0 can use any minor version within the python major versions of 3.8 or 3.9)  
 
 First initialise the python function called 'purple'.  
@@ -71,8 +71,8 @@ From within the project root (as instructed by the programming model folder stru
 Make sure you are in the project root directory 'purple'.
 ```
 mkdir .venv
-py -m venv ~/projects/landreg-func-to-blob-py/purple/.venv/landreg
-. ~/projects/landreg-func-to-blob-py/purple/.venv/landreg/bin/activate
+py -m venv ~/projects/purple/purple/.venv/landreg
+. ~/projects/purple/purple/.venv/landreg/bin/activate
 ```
 
 From the activated venv, first install the Azure Function requirements from the scaffolded 'requirements.txt' file, then install the additional Python Azure SDKs we need.  
@@ -85,7 +85,7 @@ py -m pip install azure-storage-queue
 ## 4. Startup Script
 Always set the python path so modules can be imported between project base-level folders, and VS code linters, etc. can function correctly.
 ```
-export PYTHONPATH=~/projects/landreg-func-to-blob-py/purple
+export PYTHONPATH=~/projects/purple/purple
 ```
   
 If you have installed anything with a --user flag, you also need to put your user 'bin' folder references into the PATH environment variable.  To do this, add the following 2 lines to your .profile settings. 
@@ -96,9 +96,10 @@ PATH="$HOME/.local/bin:$PATH"
   
 Optionally, create a command file to run to make your settings easier when starting development.  Place these instructions in an executable shell script.  
 ```
-. ~/projects/landreg-func-to-blob-py/purple/.venv/landreg/bin/activate
-cd ~/projects/landreg-func-to-blob-py
-export PYTHONPATH=~/projects/landreg-func-to-blob-py/purple
+. ~/projects/purple/purple/.venv/landreg/bin/activate
+cd ~/projects/purple/purple
+export PYTHONPATH=~/projects/purple/purple
+code ~/projects/purple
 ```
 Ensure you chmod the file to make it run, then execute when required
 ```
