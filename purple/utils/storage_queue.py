@@ -8,11 +8,12 @@ from azure.storage.queue import QueueClient as QC
 from azure.core.exceptions import ResourceExistsError
 
 #---------------------------------------------------------------------------------------# 
-def create(name) -> None:
+def create(name):
     """ utility to create an azure storage queue.  If the queue already exists then
         nothing will happen and the error will be ignored.
         Args:   
-            name: a string queue name.
+            name: a queue name.
+            return: the queue client for later message inserts
     """
     storage_conn_str = os.getenv('LandregDataStorage')
 
@@ -24,17 +25,5 @@ def create(name) -> None:
     except ResourceExistsError:
         pass
 
+    return queue_client
 
-#---------------------------------------------------------------------------------------# 
-def send(name, message) -> None:
-    """ utility to send a message to the queue.
-        Args:   
-            name: a string queue name.
-            messaage: the payload for the queue.
-    """
-    storage_conn_str = os.getenv('LandregDataStorage')
-
-    logging.info(f'sending message to {name}')
-    queue_client = QC.from_connection_string(storage_conn_str, name)
-
-    queue_client.send_message(message)
