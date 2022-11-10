@@ -51,6 +51,15 @@ However, execution times including message insert always exceed the funciton app
 The next option is to split our workload into much smaller units that can each run within under 5 minutes.  Firstly, try to load a single outcode of price records into a queue.  Choose the outcode with the largest number of records in the file, and run locally.  
 In the monthly update file, outcode **B5** has 257 records.
 In the yearly 2019 file, outcode **CR0** has 2,133 records.
+Optimise the queue client creation and and message send operations.
 
 ### Update 3
-Created feature branch "per-outcode".
+Timing for single Outcode storage queue inserts
+| Job | Queue Inserts | Approx Time |
+|:-----|:---------|:-------------|
+| Monthly Update (local) | 257 | 11 secs. |
+| 2019 Yearly (local) | 2,133 | 1 min, 31 secs.|
+| 2020 Yearly (local) | 2,338 | 1 min, 27 secs. |
+| 2020 Yearly (Azure) | 2,338 | 53 secs. |
+| 2020 Yearly (local) | 2,338 | 55 secs. |
+

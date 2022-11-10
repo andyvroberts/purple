@@ -41,9 +41,10 @@ def main(mytimer: func.TimerRequest) -> None:
     logging.getLogger("urllib3.connectionpool").setLevel(logging.ERROR)
     #logging.getLogger('azure.storage.queue').setLevel(logging.DEBUG)
 
-    url = "http://prod.publicdata.landregistry.gov.uk.s3-website-eu-west-1.amazonaws.com/pp-monthly-update-new-version.csv"
+    url1 = "http://prod.publicdata.landregistry.gov.uk.s3-website-eu-west-1.amazonaws.com/pp-monthly-update-new-version.csv"
+    url2 = "http://prod.publicdata.landregistry.gov.uk.s3-website-eu-west-1.amazonaws.com/pp-2020.csv"
     
-    rec_count = read_and_decode(url, "B5")
+    rec_count = read_and_decode(url2, "E14")
 
     end_exec = time.time()
     duration = end_exec - start_exec

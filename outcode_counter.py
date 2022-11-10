@@ -109,5 +109,5 @@ if __name__ == '__main__' :
 
 #
 # py outcode_counter.py -u "http://prod.publicdata.landregistry.gov.uk.s3-website-eu-west-1.amazonaws.com/pp-monthly-update-new-version.csv"
-# py outcode_counter.py -u "http://prod.publicdata.landregistry.gov.uk.s3-website-eu-west-1.amazonaws.com/pp-2019.csv"
+# py outcode_counter.py -u "http://prod.publicdata.landregistry.gov.uk.s3-website-eu-west-1.amazonaws.com/pp-2020.csv"
 # 
