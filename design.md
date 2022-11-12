@@ -15,7 +15,7 @@ The implementation should be able to execute fully within an Azure environment. 
 - NFR4: The 'latest' land registry CSV file contains approx. 100,000 records, although this process should cater for an annual file (approx. 1 million rows).
 
 # Design
-## Phase 1
+## Phase 1  
 | Requirement | Azure Choice | Notes |
 |:-------------|:--------------|:-------|
 | REQ1/2/3 | Blob File | create a hierarchical document structure to group all properties within a postcode |
@@ -40,10 +40,12 @@ Function App processing steps:
 - Store decoded record to queue
   
 ### Update 1
+Git branch "full-file"  
 Creating queues by postcode results in over 100,000 queue creation requests.  Because of this, two test executions timed-out locally after 30 minutes (Azure consumption plan time-out is 5 minutes).  Therefore, change the queue granularity to be the outcode (the first half of a postcode).  
 Some outcodes are only 2 characters long.  This makes them impossible to create as a Queue (minimum name length = 3 characters), so append the prefix "landreg-" to each queue name.   
 
 ### Update 2
+Git branch "full-file"  
 The resulting outcode process creates approximately 2,300 queues.  
 Execution times across three tests for just queue creation averaged 7 minutes.
 However, execution times including message insert always exceed the funciton app time-out after 30 minutes. 
@@ -54,6 +56,7 @@ In the yearly 2019 file, outcode **CR0** has 2,133 records.
 Optimise the queue client creation and and message send operations.
 
 ### Update 3
+Git branch "per-outcode"  
 Timing for single Outcode storage queue inserts
 | Job | Queue Inserts | Approx Time |
 |:-----|:---------|:-------------|
@@ -63,9 +66,27 @@ Timing for single Outcode storage queue inserts
 | 2020 Yearly (Azure) | 2,338 | 53 secs. |
 | 2020 Yearly (Azure) | 2,338 | 55 secs. |
   
-To complete the design, there are now some additional steps required.
-1. Determine when the monthly update file has changed
-2. Co-ordinate insert, split by every Outcode that appears within the file
-3. Track when there is new data for an Outcode, when a load is in progress and when a load is completed
+To complete the design, there are now some additional steps required.   
+- Determine when the Outcode records for the monthly update file have changed.  Triger this process daily      
+    - Read the file and create a distinct list of Outcode RowKeys and at the end, hash each set per Outcode  
+    - Read configuration for the previous hash of each Outcode  
+    - If the hash is different, send a message to the "Execution" storage queue with the outcode as the payload  
+    - If the hash is different, replace the new hash value into the configuration record  
+    - Create a Function App that is triggered by a message in the "Execution" storage queue and process the insert for the outcode given
+    - Execute the Outcode specific Queue insert process
+  
+### update 4
+Git branch "outcode-config"  
+Configuration should be saved across executions.  This should use Azure Table Storage.
+  
+Azure *Table storage* has these limitations:
+|Feature | Limitation |
+|:--------------|:----------------|
+|Unique Key per Entity|2 values: Partition Key + Row Key|
+|Max Columns (properties) per Row|252|
+|Max Row Size (data) |1Mb|
+|Max Key Size (each) |1kb|
+
+Table storage records can also be inserted in batches of 100 records.  Use this feature to reduce the number of API calls when inserting config.
   
 

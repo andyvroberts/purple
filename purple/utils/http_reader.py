@@ -20,3 +20,4 @@ def stream_file(url):
     except requests.RequestException as ex:
         logging.error('Unable to load data from HTTP: {}'.format(ex))
         raise ex
+    

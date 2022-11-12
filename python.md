@@ -65,6 +65,22 @@ To run a timer function app immediately, set the 'runOnStartup' configuration wi
 }
 ```
 
+You may also find is useful during testing to disable a particular function.  To do this set the 'disabled' flag to true.  
+```
+{
+  "disabled": true,
+  "scriptFile": "__init__.py",
+  "bindings": [
+    {
+      "name": "mytimer",
+      "type": "timerTrigger",
+      "direction": "in",
+      "schedule": "0 */2 * * * "
+    }
+  ]
+}
+```
+
 
 ## 3. Virtual Environment
 From within the project root (as instructed by the programming model folder structure), create a new '.venv' directory so you can add the virtual environment and activite it.  
