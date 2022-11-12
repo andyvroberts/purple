@@ -15,7 +15,7 @@ The implementation should be able to execute fully within an Azure environment. 
 - NFR4: The 'latest' land registry CSV file contains approx. 100,000 records, although this process should cater for an annual file (approx. 1 million rows).
 
 # Design
-## Approach 1
+## Phase 1
 | Requirement | Azure Choice | Notes |
 |:-------------|:--------------|:-------|
 | REQ1/2/3 | Blob File | create a hierarchical document structure to group all properties within a postcode |
@@ -48,7 +48,7 @@ The resulting outcode process creates approximately 2,300 queues.
 Execution times across three tests for just queue creation averaged 7 minutes.
 However, execution times including message insert always exceed the funciton app time-out after 30 minutes. 
 
-The next option is to split our workload into much smaller units that can each run within under 5 minutes.  Firstly, try to load a single outcode of price records into a queue.  Choose the outcode with the largest number of records in the file, and run locally.  
+The next option is to split our workload into much smaller units that can each run within under 5 minutes.  Firstly, try to load a single outcode of price records into a queue.  Choose the outcode with the largest number of records in the file, and run locally.  If ok, publish to Azure and run as a test.  
 In the monthly update file, outcode **B5** has 257 records.
 In the yearly 2019 file, outcode **CR0** has 2,133 records.
 Optimise the queue client creation and and message send operations.
@@ -61,5 +61,11 @@ Timing for single Outcode storage queue inserts
 | 2019 Yearly (local) | 2,133 | 1 min, 31 secs.|
 | 2020 Yearly (local) | 2,338 | 1 min, 27 secs. |
 | 2020 Yearly (Azure) | 2,338 | 53 secs. |
-| 2020 Yearly (local) | 2,338 | 55 secs. |
+| 2020 Yearly (Azure) | 2,338 | 55 secs. |
+  
+To complete the design, there are now some additional steps required.
+1. Determine when the monthly update file has changed
+2. Co-ordinate insert, split by every Outcode that appears within the file
+3. Track when there is new data for an Outcode, when a load is in progress and when a load is completed
+  
 
