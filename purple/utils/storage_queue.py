@@ -27,3 +27,12 @@ def create(name):
 
     return queue_client
 
+#---------------------------------------------------------------------------------------# 
+def send_message(client, payload):
+    """ send a message to a queue.
+        Args:   
+            client: the storage queue client
+            payload: a list of the payload data
+            return: None
+    """
+    client.send_message(payload)

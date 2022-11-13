@@ -3,10 +3,10 @@
   "scriptFile": "__init__.py",
   "bindings": [
     {
-      "name": "mytimer",
+      "name": "getLandregUpdates",
       "type": "timerTrigger",
       "direction": "in",
-      "schedule": "0 */2 * * * "
+      "schedule": "0 10 * * * "
     }
   ]
 }

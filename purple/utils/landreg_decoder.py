@@ -26,23 +26,43 @@ def prune_rec_for_queue(rec):
 
 
 #---------------------------------------------------------------------------------------#
+def format_address(rec):
+    """join the parts of the record that form the unique address component.
+        Args:   
+            rec: a dict representing the input record for a property price
+            Return: the address string
+    """
+    address_seq = []
+    if rec['Paon']:
+        address_seq.append(rec['Paon'])
+    if rec['Saon']:
+        address_seq.append(rec['Saon'])
+    if rec['Street']:
+        address_seq.append(rec['Street'])
+
+    address_string = ' '.join(address_seq)
+    return address_string
+
+
+#---------------------------------------------------------------------------------------#
 def get_outcode(rec):
     """for CSV files, decode a single line that may be quote delimited with embedded 
        commas. Return only the Outcode (first part of the postcode)
         Args:   
             rec: a CSV string representing a data record of columns
-            Return: the Outcode
+            Return: the Outcode and the Price of the record
     """
     in_cols = ['RowKey','Price','PriceDate','Postcode','PropertyType',\
                'NewBuild','Duration','Paon','Saon','Street','Locality',\
                'Town','District','County','PpdCategory','RecStatus']
     
     decoded_rec = csv.DictReader([rec], in_cols)
+    outcode = None
+    price = None
 
     for cols in decoded_rec:
         if len(cols['Postcode']) > 0:
             outcode = cols['Postcode'].split(' ')[0].lower()
-            print(outcode)
-            return outcode
-        else:
-            return None
+            price = float(cols['Price'])
+    
+    return outcode, price

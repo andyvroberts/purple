@@ -14,7 +14,9 @@ from azure.data.tables import TableServiceClient
 storage_conn_str = os.getenv('LandregDataStorage')
 tab_service = TableServiceClient.from_connection_string(storage_conn_str)
 ```
-
+see the MS docs page for using Python with Azure tables.
+https://learn.microsoft.com/en-us/python/api/azure-data-tables/azure.data.tables.tableclient?view=azure-python#azure-data-tables-tableclient-get-entity
+  
 See the github Python samples.  
 https://github.com/Azure/azure-sdk-for-python/tree/main/sdk/tables/azure-data-tables/samples
   

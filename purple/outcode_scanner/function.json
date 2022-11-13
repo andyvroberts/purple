@@ -2,10 +2,10 @@
   "scriptFile": "__init__.py",
   "bindings": [
     {
-      "name": "mytimer",
+      "name": "outcodeScanner",
       "type": "timerTrigger",
       "direction": "in",
-      "schedule": "0 8 * * * *",
+      "schedule": "0 8 * * *",
       "runOnStartup": true
     }
   ]

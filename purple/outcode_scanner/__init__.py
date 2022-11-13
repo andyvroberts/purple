@@ -1,31 +1,48 @@
 import time
 import logging
+from collections import defaultdict
 import azure.functions as func
 
 from utils import http_reader
 from utils import landreg_decoder
 from utils import config_table
+from utils import storage_queue
+from utils import common
 
 #---------------------------------------------------------------------------------------# 
-def read_file_and_create_config(url, table_name):
+def read_file_and_check_config(url):
     record_count = 0
+    queue_count = 0
+    outcode_check = defaultdict(float)
+    partition_key = common.config_outcode_changes_partition()
+    outcode_status = common.config_ready_status()
 
-    # always create the table and return the table service client.
-    tc = config_table.create(table_name)
+    # get references for the table client and queue client
+    tc = config_table.create(common.config_table_name())
+    sq = storage_queue.create(common.load_trigger_queue_name())
 
     for stream_rec in http_reader.stream_file(url):
         record_count += 1
-        outcode = landreg_decoder.get_outcode(stream_rec)
+        outcode, price = landreg_decoder.get_outcode(stream_rec)
 
-        # if the outcode exists and is the one we are searching for.
+        if outcode is not None:
+            outcode_check[outcode] += price
 
+    for k, v in outcode_check.items():
+        row_key = common.format_landreg_resource_name(k)
+        
+        if config_table.have_outcode_rows_changed(tc, partition_key, row_key, v, outcode_status):
+            queue_count += 1
+            storage_queue.send_message(sq, k)
 
+    logging.info(f'Number of outcodes = {len(outcode_check)}')
     logging.info(f'File records read = {record_count}')
+    logging.info(f'{common.load_trigger_queue_name()} Queue messages sent = {queue_count}')
     return record_count
 
 
 #---------------------------------------------------------------------------------------# 
-def main(mytimer: func.TimerRequest) -> None:
+def main(outcodeScanner: func.TimerRequest) -> None:
     start_exec = time.time()
     # suppress or show messages from Azure loggers.
     logging.getLogger("azure.core.pipeline").setLevel(logging.ERROR)
@@ -35,7 +52,7 @@ def main(mytimer: func.TimerRequest) -> None:
     url1 = "http://prod.publicdata.landregistry.gov.uk.s3-website-eu-west-1.amazonaws.com/pp-monthly-update-new-version.csv"
     url2 = "http://prod.publicdata.landregistry.gov.uk.s3-website-eu-west-1.amazonaws.com/pp-2020.csv"
     
-    rec_count = read_file_and_create_config(url1, "LandregConfig")
+    rec_count = read_file_and_check_config(url1)
 
     end_exec = time.time()
     duration = end_exec - start_exec

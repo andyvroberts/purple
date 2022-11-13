@@ -5,13 +5,14 @@ import azure.functions as func
 from utils import http_reader
 from utils import landreg_decoder
 from utils import storage_queue
+from utils import common
 
 #---------------------------------------------------------------------------------------# 
 def read_and_decode(url, outcode):
     record_count = 0
     queue_count = 0
     scan_outcode = outcode.lower()
-    queue_name = "landreg-" + scan_outcode
+    queue_name = common.format_landreg_resource_name(scan_outcode)
 
     # always create the queue for the queue client it returns.
     qc = storage_queue.create(queue_name)
@@ -34,7 +35,7 @@ def read_and_decode(url, outcode):
     return record_count
 
 #---------------------------------------------------------------------------------------# 
-def main(mytimer: func.TimerRequest) -> None:
+def main(getLandregUpdates: func.TimerRequest) -> None:
     start_exec = time.time()
     # suppress or show messages from Azure loggers.
     logging.getLogger("azure.core.pipeline").setLevel(logging.ERROR)
