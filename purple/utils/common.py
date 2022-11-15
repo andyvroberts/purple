@@ -17,3 +17,11 @@ def format_landreg_resource_name(suffix):
 
 def config_ready_status():
     return "A"
+
+def landreg_monthly_update_url():
+    return "http://prod.publicdata.landregistry.gov.uk.s3-website-eu-west-1.amazonaws.com/pp-monthly-update-new-version.csv"
+
+def landreg_yearly_url(year):
+    base_name = "http://prod.publicdata.landregistry.gov.uk.s3-website-eu-west-1.amazonaws.com/pp-XXXX.csv"
+    file_url = base_name.replace('XXXX', year)
+    return file_url

@@ -9,8 +9,8 @@ from utils import config_table
 from utils import storage_queue
 from utils import common
 
-#---------------------------------------------------------------------------------------# 
-def read_file_and_check_config(url):
+#---------------------------------------------------------------------------------------#
+def read_file_and_check_config():
     record_count = 0
     queue_count = 0
     outcode_check = defaultdict(float)
@@ -19,9 +19,9 @@ def read_file_and_check_config(url):
 
     # get references for the table client and queue client
     tc = config_table.create(common.config_table_name())
-    sq = storage_queue.create(common.load_trigger_queue_name())
+    qc = storage_queue.create(common.load_trigger_queue_name())
 
-    for stream_rec in http_reader.stream_file(url):
+    for stream_rec in http_reader.stream_file(common.landreg_monthly_update_url()):
         record_count += 1
         outcode, price = landreg_decoder.get_outcode(stream_rec)
 
@@ -33,7 +33,7 @@ def read_file_and_check_config(url):
         
         if config_table.have_outcode_rows_changed(tc, partition_key, row_key, v, outcode_status):
             queue_count += 1
-            storage_queue.send_message(sq, k)
+            storage_queue.send_message(qc, k)
 
     logging.info(f'Number of outcodes = {len(outcode_check)}')
     logging.info(f'File records read = {record_count}')
@@ -48,11 +48,8 @@ def main(outcodeScanner: func.TimerRequest) -> None:
     logging.getLogger("azure.core.pipeline").setLevel(logging.ERROR)
     logging.getLogger("urllib3.connectionpool").setLevel(logging.ERROR)
     #logging.getLogger('azure.storage.queue').setLevel(logging.DEBUG)
-
-    url1 = "http://prod.publicdata.landregistry.gov.uk.s3-website-eu-west-1.amazonaws.com/pp-monthly-update-new-version.csv"
-    url2 = "http://prod.publicdata.landregistry.gov.uk.s3-website-eu-west-1.amazonaws.com/pp-2020.csv"
     
-    rec_count = read_file_and_check_config(url1)
+    rec_count = read_file_and_check_config()
 
     end_exec = time.time()
     duration = end_exec - start_exec
