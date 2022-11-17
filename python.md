@@ -43,7 +43,7 @@ func init purple --python
 
 Navigate into the new directory "purple", then create a function.  Use the templates list command if you need it.  
 ```
-func templates lists -l python
+func templates list -l python
 func new --name get_landreg_updates --template "Timer trigger"
 ```
 For cron expressions see this web page:  
@@ -162,9 +162,9 @@ sudo apt install libssl-dev
 
 Now follow these steps to install a different python version, and be careful to use *make altinstall*. 
 ```
-wget https://www.python.org/ftp/python/3.8.0/Python-3.8.0.tgz  
-tar xzf Python-3.8.0.tgz
-cd Python-3.8.0
+wget https://www.python.org/ftp/python/3.9.10/Python-3.9.10.tgz  
+tar xzf Python-3.9.10.tgz
+cd Python-3.9.10
 ./configure
 sudo make altinstall
 ```
@@ -181,12 +181,12 @@ Then before running the 'make' command, change the configure command to be expli
 
 Note: If you have a fresh linux container you may also need to install gcc and make, etc.  
 ```
-sudo apt-get install build-essentials
+sudo apt-get install build-essential
 ```
 
 This alternative major python version (and any others) should now be visible in the /usr/local/bin.  
 
-By using the altinstall make file, the process will not create symlinks and referencesj to the alternative version, so We should create an alias for this in our .bashrc file so we can use it by typing a simple 'py38' command.
+By using the altinstall make file, the process will not create symlinks and references to the alternative version, so We should create an alias for this in our .bashrc file so we can use it by typing a simple 'py38' command.
 ```
 alias py38='/usr/local/bin/python3.8'
 ```  
