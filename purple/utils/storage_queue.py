@@ -36,3 +36,15 @@ def send_message(client, payload):
             return: None
     """
     client.send_message(payload)
+
+
+#---------------------------------------------------------------------------------------# 
+def delete_message(client, id, pop_receipt):
+    """ send a message to a queue.
+        Args:   
+            client: the storage queue client
+            id: the identifier from a retrieved message
+            pop_receipt: the pop receipt from a retrieved message
+            return: None
+    """
+    client.delete_message(id, pop_receipt)

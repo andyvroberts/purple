@@ -29,7 +29,7 @@ def read_file_and_check_config():
             outcode_check[outcode] += price
 
     for k, v in outcode_check.items():
-        row_key = common.format_landreg_resource_name(k)
+        row_key = common.format_landreg_queue_name(k)
         
         if config_table.have_outcode_rows_changed(tc, partition_key, row_key, v, outcode_status):
             queue_count += 1

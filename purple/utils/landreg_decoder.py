@@ -26,22 +26,52 @@ def prune_rec_for_queue(rec):
 
 
 #---------------------------------------------------------------------------------------#
-def format_address(rec):
+def format_address(paon, saon, street):
     """join the parts of the record that form the unique address component.
         Args:   
-            rec: a dict representing the input record for a property price
+            paon, saon, street: strings representing components of address line 1
             Return: the address string
     """
     address_seq = []
-    if rec['Paon']:
-        address_seq.append(rec['Paon'])
-    if rec['Saon']:
-        address_seq.append(rec['Saon'])
-    if rec['Street']:
-        address_seq.append(rec['Street'])
+    if paon:
+        address_seq.append(paon)
+    if saon:
+        address_seq.append(saon)
+    if street:
+        address_seq.append(street)
 
     address_string = ' '.join(address_seq)
     return address_string
+
+
+#---------------------------------------------------------------------------------------#
+def format_for_msg(rec):
+    """format the csv record for storage in a queue message. 
+        Args:   
+            rec: a CSV string representing a data record of columns
+            Return: a dictionary of the record to be added to the queue
+    """
+    in_cols = ['RowKey','Price','PriceDate','Postcode','PropertyType',\
+               'NewBuild','Duration','Paon','Saon','Street','Locality',\
+               'Town','District','County','PpdCategory','RecStatus']
+    
+    decoded_rec = csv.DictReader([rec], in_cols)
+    price_rec = {}
+
+    for cols in decoded_rec:
+        if len(cols['Postcode']) > 0:
+            price_rec['Postcode'] = cols['Postcode']
+            price_rec['Address'] = format_address(cols['Paon'], cols['Saon'], cols['Street'])
+            price_rec['Price'] = int(cols['Price'])
+            price_rec['Date'] = cols['PriceDate']
+            price_rec['Locality'] = cols['Locality']
+            price_rec['Town'] = cols['Town']
+            price_rec['District'] = cols['District']
+            price_rec['County'] = cols['County']
+        else:
+            price_rec = None
+    
+    return price_rec
 
 
 #---------------------------------------------------------------------------------------#
