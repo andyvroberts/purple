@@ -2,7 +2,7 @@
   "scriptFile": "__init__.py",
   "bindings": [
     {
-      "name": "load_postcodes",
+      "name": "pcodes",
       "type": "queueTrigger",
       "direction": "in",
       "queueName": "load-postcodes",

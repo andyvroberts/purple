@@ -5,7 +5,7 @@ import azure.functions as func
 
 from utils import http_reader
 from utils import landreg_decoder
-from utils import config_table
+from utils import storage_table
 from utils import storage_queue
 from utils import common
 
@@ -18,7 +18,7 @@ def read_file_and_check_config():
     outcode_status = common.config_ready_status()
 
     # get references for the table client and queue client
-    tc = config_table.create(common.config_table_name())
+    tc = storage_table.create(common.config_table_name())
     qc = storage_queue.create(common.load_trigger_queue_name())
 
     for stream_rec in http_reader.stream_file(common.landreg_monthly_update_url()):
@@ -31,7 +31,7 @@ def read_file_and_check_config():
     for k, v in outcode_check.items():
         row_key = common.format_landreg_queue_name(k)
         
-        if config_table.have_outcode_rows_changed(tc, partition_key, row_key, v, outcode_status):
+        if storage_table.have_outcode_rows_changed(tc, partition_key, row_key, v, outcode_status):
             queue_count += 1
             storage_queue.send_message(qc, k)
 

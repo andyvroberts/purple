@@ -6,6 +6,9 @@
 def config_table_name():
     return "LandregConfig"
 
+def price_table_name():
+    return "LandregPrice"
+
 def load_outcode_trigger_queue_name():
     return "load-outcodes"
 

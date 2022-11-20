@@ -26,7 +26,7 @@ def prune_rec_for_queue(rec):
 
 
 #---------------------------------------------------------------------------------------#
-def format_address(paon, saon, street):
+def format_address(paon, saon, street, postcode):
     """join the parts of the record that form the unique address component.
         Args:   
             paon, saon, street: strings representing components of address line 1
@@ -39,6 +39,8 @@ def format_address(paon, saon, street):
         address_seq.append(saon)
     if street:
         address_seq.append(street)
+    #if postcode:
+    #    address_seq.append(postcode)
 
     address_string = ' '.join(address_seq)
     return address_string
@@ -61,9 +63,9 @@ def format_for_msg(rec):
     for cols in decoded_rec:
         if len(cols['Postcode']) > 0:
             price_rec['Postcode'] = cols['Postcode']
-            price_rec['Address'] = format_address(cols['Paon'], cols['Saon'], cols['Street'])
+            price_rec['Address'] = format_address(cols['Paon'], cols['Saon'], cols['Street'], cols['Postcode'])
             price_rec['Price'] = int(cols['Price'])
-            price_rec['Date'] = cols['PriceDate']
+            price_rec['Date'] = cols['PriceDate'][0:10]  # yyyy-mm-dd only
             price_rec['Locality'] = cols['Locality']
             price_rec['Town'] = cols['Town']
             price_rec['District'] = cols['District']
