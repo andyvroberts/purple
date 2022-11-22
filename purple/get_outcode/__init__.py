@@ -13,7 +13,7 @@ def read_and_decode(qc, scan_outcode) -> int:
     record_count = 0
     queue_count = 0
 
-    for stream_rec in http_reader.stream_file(common.landreg_monthly_update_url()):
+    for stream_rec in http_reader.stream_file():
         record_count += 1
         rec = landreg_decoder.format_for_msg(stream_rec)
 

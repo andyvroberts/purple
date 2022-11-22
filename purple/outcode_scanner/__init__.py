@@ -21,7 +21,7 @@ def read_file_and_check_config():
     tc = storage_table.create(common.config_table_name())
     qc = storage_queue.create(common.load_trigger_queue_name())
 
-    for stream_rec in http_reader.stream_file(common.landreg_monthly_update_url()):
+    for stream_rec in http_reader.stream_file():
         record_count += 1
         outcode, price = landreg_decoder.get_outcode(stream_rec)
 

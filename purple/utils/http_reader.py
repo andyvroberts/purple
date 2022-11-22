@@ -1,14 +1,16 @@
 import logging
 import requests
+import os
 
 #---------------------------------------------------------------------------------------#   
-def stream_file(url):
+def stream_file():
     """create a generator to stream-read HTTP file lines (records). 
         https://2.python-requests.org/en/master/user/advanced/#id9
         Args:
             path: the path to the data.
             Return: a generator of file records
     """
+    url = os.getenv('PriceDataURL')
     logging.info(f'Streaming price file from {url}.')
     try:
         with requests.get(url, stream=True) as f:

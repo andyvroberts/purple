@@ -62,7 +62,6 @@ def have_outcode_rows_changed(client, partkey, rowkey, total_value, ready_status
 
     try:
         entity = client.get_entity(partition_key=partkey, row_key=rowkey)
-        logging.info(f'ENTITY] {entity}')
 
         if entity['Total'] != this_row['Total']:
             client.insert_or_replace(this_row)
@@ -95,7 +94,6 @@ def match_price(client, partkey, rowkey, new_price, price_record):
             return: table entity | None
     """
     price_entity = {}
-    logging.info(price_record)
 
     try:
         price_entity = client.get_entity(partition_key=partkey, row_key=rowkey)

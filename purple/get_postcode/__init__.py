@@ -13,16 +13,13 @@ def lookup_price_and_create_or_update(price_record):
     # read the price record from table storage.
     partition_key = price_record['Postcode']
     row_key = price_record['Address']
-    logging.info(f"Checking Table for Address: {row_key}")
 
     price_dict = {}
     price_dict[price_record['Date']] = price_record['Price']
-    logging.info(price_dict)
     price_table = storage_table.create(common.price_table_name())
 
     # do the storage table related work
     table_record = storage_table.match_price(price_table, partition_key, row_key, price_dict, price_record)
-    logging.info(table_record)
 
     if table_record is not None:
         storage_table.upsert_replace(price_table, table_record)
@@ -48,7 +45,6 @@ def read_prices_and_store(outcode):
         for msg in msg_bat:
             rec_dict = ast.literal_eval(msg.content) # queue content is string so cast to dict
             entity_stored_count += lookup_price_and_create_or_update(rec_dict)
-
             prices_queue.delete_message(msg.id, msg.pop_receipt) 
 
     return entity_stored_count
