@@ -9,14 +9,14 @@ from collections import defaultdict
 
 
 #---------------------------------------------------------------------------------------#   
-def controller() -> None:
+def outcode_counter() -> None:
     """
         Read each record in the csv file and accumulate a count for each distinct 
         outcode that is found.
 
         Args: None
     """
-    log = logging.getLogger("outcode_counter.controller")
+    log = logging.getLogger("outcode_counter.outcode_counter")
     log.info("-------------------------------------------------------------------")
     start_exec = time.time()
     log.debug(f'executing from path {os.getcwd()}')
@@ -38,6 +38,43 @@ def controller() -> None:
     # log the output
     for k, v in srt.items():
         log.info(f'{k}: {v:,}')
+
+    end_exec = time.time()
+    duration = end_exec - start_exec
+    hours, hrem = divmod(duration, 3600)
+    mins, secs = divmod(hrem, 60)
+    log.info(f"Finished process: {hours}:{mins}:{round(secs, 2)}.")
+
+
+#---------------------------------------------------------------------------------------#   
+def postcodes_counter() -> None:
+    """
+        Read each record in the csv file and accumulate a count for each distinct 
+        postcodes if the record matches the outcode passed in.
+
+        Args: None
+    """
+    log = logging.getLogger("outcode_counter.postcode_counter")
+    log.info("-------------------------------------------------------------------")
+    start_exec = time.time()
+    log.debug(f'executing from path {os.getcwd()}')
+
+    args = parse_command_line()
+    data_url = args.url
+    outcode = args.outcode
+
+    # collect the count by outcode
+    postcodes = set()
+    for csv_row in stream_file(data_url):
+        if len(csv_row['Postcode']) > 0:
+            pc = csv_row['Postcode']
+            oc = pc.split(' ')[0].upper()
+
+            if outcode.upper() == oc:
+                postcodes.add(pc)
+
+    # nothing complicated, just log the postcode set (distinct) count.
+    log.info(f'Found {len(postcodes)} postcodes in Outcode {outcode}')
 
     end_exec = time.time()
     duration = end_exec - start_exec
@@ -90,6 +127,7 @@ def decode(rec):
 def parse_command_line():
     par = argparse.ArgumentParser("Land Registry data file - outcode counter")
     par.add_argument('-u', '--url', required=True, help='the full web url of the land registry file')
+    par.add_argument('-o', '--outcode', required=False, help='an optional outcode when counting postcodes')
 
     args = par.parse_args()
     return args
@@ -105,9 +143,9 @@ if __name__ == '__main__' :
             logging.StreamHandler(sys.stdout)
         ]
     )
-    controller()
+    postcodes_counter()
 
 #
 # py outcode_counter.py -u "http://prod.publicdata.landregistry.gov.uk.s3-website-eu-west-1.amazonaws.com/pp-monthly-update-new-version.csv"
 # py outcode_counter.py -u "http://prod.publicdata.landregistry.gov.uk.s3-website-eu-west-1.amazonaws.com/pp-2020.csv"
-# 
+# py outcode_counter.py -o "cr0" -u "http://prod.publicdata.landregistry.gov.uk.s3-website-eu-west-1.amazonaws.com/pp-2020.csv"# 

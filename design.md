@@ -75,7 +75,7 @@ To complete the design, there are now some additional steps required.
     - Create a Function App that is triggered by a message in the "Execution" storage queue and process the insert for the outcode given
     - Execute the Outcode specific Queue insert process
   
-### update 4
+### Update 4
 Git branch "outcode-config"  
 Configuration should be saved across executions.  This should use Azure Table Storage.
   
@@ -89,4 +89,25 @@ Azure *Table storage* has these limitations:
 
 Table storage records can also be inserted in batches of 100 records.  Use this feature to reduce the number of API calls when inserting config.
   
+### Update 5
+Table storage proved to be so easy to use, I decided to also make it the price record storage medium, replacing the previous design choice of blobs.  The additinal benefits of this are the ability to query rows by partition + row keys and to perform upsert (insert if now, else update) operations on rows.
+
+Price records:
+- There should only be 1 record per property
+- Prices should be stored in a column as a array of key/value pairs (date: price)
+- The partition key should be the Postcode
+- The row key should be the address
+  
+### Update 6  
+Git branch "price-batch"  
+We encountered another timing issue when inserting many rows into Azure table storage.  A single threaded python process can insert approximately 1000 rows within a 5-minute window, although the this leaves a narrow margin of safety.   
+
+There are only 2 ways to increase table storage insert performance.  Either parallel process or insert in batches of 100.  We will choose to insert price records in batches but this means we must alter our partition key, as all records belonging ot a single batch insert must be for the same partition key.
+
+Price records:
+- Partition key is outcode (already our grouping in queue's by outcode)
+- Row key is now the postcode followed by the address
+- Address should also now be stored as an additional non-key column
+    
+
 
