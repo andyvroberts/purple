@@ -43,6 +43,48 @@ def upsert_replace(client, table_record):
         raise he
 
 
+#---------------------------------------------------------------------------------------# 
+def create_entity_from_price_record(price_rec):
+    """ convert an input price price record into the format required for table storage.
+        Args:   
+            price_rec: the input source format
+            return: table storage entity record for the price
+    """
+    new_entity = {}
+    new_entity['PartitionKey'] = price_rec['Postcode'].split(' ')[0]
+    new_entity['RowKey'] = f"{price_rec['Postcode']}~{price_rec['Address']}"
+    # Prices must be a list of strings.
+    new_entity['Prices'] = [(f"{price_rec['Date']}~{price_rec['Price']}")]
+    new_entity['Address'] = price_rec['Address']
+    new_entity['Postcode'] = price_rec['Postcode']
+    new_entity['Locality'] = price_rec['Locality']
+    new_entity['Town'] = price_rec['Town']
+    new_entity['District'] = price_rec['District']
+    new_entity['County'] = price_rec['County']
+
+    return new_entity
+
+
+#---------------------------------------------------------------------------------------#
+def price_exists(check_entity, new_price):
+    """
+        does the table entity already contain the new price.
+
+        Args:   
+            check_entity: an existing table entity being checked (dict)
+            new_price: a date~price string in a list ['2022-04-07~345000']
+            Return: True or False
+    """
+    # convert all prices into lists for the check.
+    epl = ast.literal_eval(check_entity['Prices'])  
+    np = list(new_price)
+
+    if np[0] in epl:
+        return True
+    else:
+        return False
+
+
 #---------------------------------------------------------------------------------------#
 def merge_prices(entity_list):
     """
@@ -71,15 +113,16 @@ def merge_prices(entity_list):
 
     # loop through the enitty list and within each entity the price list
     for next_entity in entity_list:
-        ep = next_entity['Prices']
-        epl = ast.literal_eval(ep)
+        # we need the date~price strings such as ['2022-01-01~234500'] to be in a list type
+        epl = ast.literal_eval(str(next_entity['Prices']))  
 
-        for price_dict in epl:
-            price_set.add(price_dict)
+        for price in epl:
+            price_set.add(price)
 
     # turn the set into a list and replace the 'Prices' field in the returned dict.
     merge_prices = list(price_set)
-    merged_price_entity['Prices'] = str(merge_prices)
+    sorted_prices = sorted(merge_prices)
+    merged_price_entity['Prices'] = sorted_prices
 
     return merged_price_entity
 
@@ -88,7 +131,7 @@ def merge_prices(entity_list):
 def dedup_rowkey_and_merge_prices(batch):
     """
         A batch can have duplicate rowkeys.  If so, merge all the prices into a single
-        record and discard the rest.
+        record and discard the remaining duplicates.
         Args:   
             batch: the input list of table entity records
             Return: deduplicated list of table entity records
@@ -98,15 +141,17 @@ def dedup_rowkey_and_merge_prices(batch):
     # can only groupby contiguous records so sort first.
     sorted_bat = sorted(batch, key=lambda x: x['RowKey'])
     
+    # do the groupby and if we get a group with more than 1 record, send it off for 
+    # the price merging process.
     for k, g in groupby(sorted_bat, key=lambda x: x['RowKey']):
         templist = list(g)
         if len(templist) > 1:
-            logging.info(templist)
+            merged = merge_prices(templist)
+            output_batch.append(merged)
+            logging.info(f'41. {k}')
         else:
             output_batch.append(templist[0])
-
-    logging.info(output_batch)
-
+    
     return output_batch
 
 #---------------------------------------------------------------------------------------# 
@@ -137,6 +182,39 @@ def upsert_replace_batch(client, batch):
     except TableTransactionError as txne:
         logging.error(txne)
         raise txne
+
+
+#---------------------------------------------------------------------------------------# 
+def lookup_price_entity(client, new_entity):
+    """ read the price table for an existing record.
+        if the record is found and the new price already exists return None.
+        if the reocrd is found and the price does not exist return a record with merged prices
+        if the record is not found return the new entity passed in
+
+        Args: 
+            client: the azure table client for the configuration table
+            new_entity: the price record being checked for table insertion (dict)
+            return: table entity | None
+    """
+    partkey = new_entity['PartitionKey']
+    rowkey = new_entity['RowKey']
+
+    try:
+        price_entity = client.get_entity(partition_key=partkey, row_key=rowkey)
+
+        if price_exists(price_entity, new_entity['Prices']):
+            return None
+        else:
+            # price does not exist
+            to_be_merged = [price_entity, new_entity]
+            return merge_prices()
+
+    except ResourceNotFoundError as nfe:
+        return new_entity
+
+    except HttpResponseError as re:
+        logging.error(re.error)
+        raise re
 
 
 #---------------------------------------------------------------------------------------# 
@@ -174,61 +252,6 @@ def have_outcode_rows_changed(client, partkey, rowkey, total_value, ready_status
         logging.error(re.error)
         raise re
 
-
-#---------------------------------------------------------------------------------------# 
-def match_price(client, partkey, rowkey, new_price, price_record):
-    """ read the price table for an existing record.
-        if the record is found and the price exists return None.
-        if the reocrd is found and the price does not exist return the modified table entity
-        if the record is not found return a new table entity
-        Args: 
-            client: the azure table client for the configuration table
-            partition_key: the outcode
-            row_key: the address key
-            new_price: the dict of the price we are searching for, eg {'2022-01-01': 456000}
-            return: table entity | None
-    """
-    price_entity = {}
-
-    try:
-        price_entity = client.get_entity(partition_key=partkey, row_key=rowkey)
-        # convert the prices string back into a list of dicts
-        ep = price_entity['Prices']
-        epl = ast.literal_eval(ep)
-
-        if not next((item for item in epl if item == new_price), False):
-            epl.append(new_price)
-            price_entity['Prices'] = str(epl) # cannot store a list datatype in a table
-            return price_entity
-        else:
-            # price alread exists in the table entity
-            return None
-
-    except ResourceNotFoundError as nfe:
-        price_list = []
-        price_list.append(new_price)
-        price_entity['PartitionKey'] = partkey
-        price_entity['RowKey'] = rowkey
-        price_entity['Prices'] = str(price_list) # cannot store a list datatype in a table
-        price_entity['Address'] = price_record['Address']
-        price_entity['Postcode'] = price_record['Postcode']
-        price_entity['Locality'] = price_record['Locality']
-        price_entity['Town'] = price_record['Town']
-        price_entity['District'] = price_record['District']
-        price_entity['County'] = price_record['County']
-        return price_entity
-
-    except HttpResponseError as re:
-        # unexpected error
-        logging.error(re.error)
-        raise re
-#
-# test_list = [{'2022-01-01':45000}, {'2022-03-10':37000}, {'2022-05-21': 670000}]
-# new_price = {'2022-03-10':37000}
-# false_price = {'2022-03-10':37600}
-# next(item for item in test_list if item == new_price)
-# next((item for item in test_list if item == new_price), False)
-#
 
 #-----------------------------------------------------------------------------------#
 def table_batch(data, batch_size: int=100):

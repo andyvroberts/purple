@@ -10,15 +10,11 @@ from utils import common
 
 #---------------------------------------------------------------------------------------#
 def lookup_price_and_prep_record(price_table, price_record):
-    # read the price record from table storage.
-    partition_key = price_record['Postcode'].split(' ')[0]
-    row_key = f"{price_record['Postcode']}~{price_record['Address']}"
-
-    price_dict = {}
-    price_dict[price_record['Date']] = price_record['Price']
+    # set the partition and rowkeys for searching the table entities.
+    new_entity = storage_table.create_entity_from_price_record(price_record)
 
     # do the storage table related work
-    return storage_table.match_price(price_table, partition_key, row_key, price_dict, price_record)
+    return storage_table.lookup_price_entity(price_table, new_entity)
 
 
 #---------------------------------------------------------------------------------------#
@@ -43,7 +39,7 @@ def store_prices(outcode):
             price_rec = lookup_price_and_prep_record(price_table, rec_dict)
 
             if price_rec is not None:
-                logging.info(f'23. {price_rec}')
+                #logging.info(f'23. {price_rec}')
                 operation_batch.append(price_rec)
                 batch_count += 1
 
