@@ -46,18 +46,18 @@ def main(msg: func.QueueMessage) -> None:
     scan_outcode = outcode.lower()
     queue_name = common.format_landreg_queue_name(scan_outcode)
     logging.info(f'Queue Name = {queue_name}')
-    outcode_queue = storage_queue.create(queue_name)
+    outcode_queue = storage_queue.get_queue_client(queue_name)
 
     # read the data and find all outcode records
     created_msg_count = read_and_decode(outcode_queue, scan_outcode)
     logging.info(f'Queue Messages sent = {created_msg_count}')
 
     # create a message on the load-postcode queue.
-    postcode_queue = storage_queue.create(common.load_postcode_trigger_queue_name())
+    postcode_queue = storage_queue.get_queue_client(common.load_postcode_trigger_queue_name())
     storage_queue.send_message(postcode_queue, outcode)
 
     # delete the message from the load-outcodes queue as this workload has completed.
-    trigger_queue = storage_queue.create(common.load_outcode_trigger_queue_name())
+    trigger_queue = storage_queue.get_queue_client(common.load_outcode_trigger_queue_name())
     storage_queue.delete_message(trigger_queue, id, pop)
 
     end_exec = time.time()

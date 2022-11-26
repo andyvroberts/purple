@@ -1,23 +1,18 @@
 import logging
 import os
 
-from azure.storage.queue import BinaryBase64EncodePolicy
-from azure.storage.queue.aio import QueueClient as QueueclientAsync
 from azure.storage.queue import QueueClient
-
 from azure.core.exceptions import ResourceExistsError
 
 #---------------------------------------------------------------------------------------# 
-def create(name):
-    """ utility to create an azure storage queue.  If the queue already exists then
-        nothing will happen and the error will be ignored.
+def get_queue_client(name):
+    """ utility to get a reference to an azure storage queue.
+        try to create the queue in case it does not already exist.
         Args:   
             name: a queue name.
             return: the queue client for later message inserts
     """
     storage_conn_str = os.getenv('LandregDataStorage')
-
-    logging.info(f'creating queue {name}')
     queue_client = QueueClient.from_connection_string(storage_conn_str, name)
 
     try:

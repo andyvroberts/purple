@@ -94,10 +94,12 @@ Table storage proved to be so easy to use, I decided to also make it the price r
 
 Price records:
 - There should only be 1 record per property
-- Prices should be stored in a column as a array of key/value pairs (date: price)
+- Prices should be stored in a column as a list (array) of key/value pairs (date: price)
 - The partition key should be the Postcode
 - The row key should be the address
-  
+    
+Note: for the 2019 price file, the outcode CR0 has approximatly 1,100 distinct postcodes from the 2,133 records.  
+   
 ### Update 6  
 Git branch "price-batch"  
 We encountered another timing issue when inserting many rows into Azure table storage.  A single threaded python process can insert approximately 1000 rows within a 5-minute window, although the this leaves a narrow margin of safety.   

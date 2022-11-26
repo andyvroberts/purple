@@ -15,7 +15,7 @@ def read_and_decode(url, outcode):
     queue_name = common.format_landreg_resource_name(scan_outcode)
 
     # always create the queue for the queue client it returns.
-    qc = storage_queue.create(queue_name)
+    qc = storage_queue.get_queue_client(queue_name)
 
     for stream_rec in http_reader.stream_file(url):
         record_count += 1
