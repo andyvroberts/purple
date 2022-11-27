@@ -25,8 +25,7 @@ def store_prices(outcode):
     price_table = storage_table.get_table_client(common.price_table_name())
 
     # get multiple messages at one time (max 32), process them in a batch and then delete.
-    msgs = prices_queue.receive_messages(messages_per_page=32, visibility_timeout=60)
-    logging.info(f'21. reading message queue')
+    msgs = prices_queue.receive_messages(messages_per_page=32, visibility_timeout=60*5)
 
     # set up batch collection
     operation_batch = []
@@ -39,7 +38,6 @@ def store_prices(outcode):
             price_rec = lookup_price_and_prep_record(price_table, rec_dict)
 
             if price_rec is not None:
-                #logging.info(f'23. {price_rec}')
                 operation_batch.append(price_rec)
                 batch_count += 1
 
@@ -48,15 +46,13 @@ def store_prices(outcode):
                     operation_batch = []
                     total_count += batch_count
                     batch_count = 0
-                    logging.info(f'13. Inserted Batch.')
 
             storage_queue.delete_message(prices_queue, msg.id, msg.pop_receipt) 
 
     # insert final batch that did not reach the batch limit of 100
     if len(operation_batch) > 0:
-        #storage_table.upsert_replace_batch(price_table, operation_batch)
+        storage_table.upsert_replace_batch(price_table, operation_batch)
         total_count += batch_count
-        logging.info(f'15. total inserts = {total_count}')
 
     return total_count
 
@@ -74,11 +70,11 @@ def main(pcodes: func.QueueMessage) -> None:
     outcode = pcodes.get_body().decode('utf-8').lower()
     id = pcodes.id
     pop = pcodes.pop_receipt
-    logging.info(f'01. triggered outcode = {outcode}')
+    logging.info(f'LOAD_POSTCODE. triggered outcode = {outcode}')
 
     # read the price records and process them
     stored = store_prices(outcode)
-    logging.info(f'99. Table records created or modified = {stored}')
+    logging.info(f'LOAD_POSTCODE. Table records created or modified = {stored}')
 
     # delete the message from the load-postcodes queue as this workload has completed.
     trigger_queue = storage_queue.get_queue_client(common.load_postcode_trigger_queue_name())
@@ -88,4 +84,4 @@ def main(pcodes: func.QueueMessage) -> None:
     duration = end_exec - start_exec
     hours, hrem = divmod(duration, 3600)
     mins, secs = divmod(hrem, 60)
-    logging.info(f'Execution Duration: {hours}hrs, {mins}mins, {round(secs,0)}secs')
+    logging.info(f'LOAD_POSTCODE. Execution Duration: {hours}hrs, {mins}mins, {round(secs,0)}secs')

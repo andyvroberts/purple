@@ -1,6 +1,5 @@
 import logging
 import os
-import ast
 from itertools import groupby
 
 from azure.data.tables import TableClient, UpdateMode, TableTransactionError
@@ -22,11 +21,36 @@ def get_table_client(name):
 
     try:
         table_client.create_table()
-        logging.info(f'created table {name}')
+        logging.info(f'STORAGE_TABLE. created table {name}')
     except ResourceExistsError:
         pass
 
     return table_client
+
+
+#---------------------------------------------------------------------------------------#
+def format_rowkey(row_key):
+    """ remove characters that cannot be included in a RowKey value
+    """
+    return row_key.replace('\\',' ').replace('/',' ').replace('#','').replace('?','')
+
+
+#---------------------------------------------------------------------------------------#
+def string_to_list(prices_string):
+    """ convert the retrieved table entity prices string into a python list type
+    """
+    prices_array = prices_string.split(',')
+
+    return list(prices_array)
+
+
+#---------------------------------------------------------------------------------------#
+def list_to_string(prices_list):
+    """ convert a list of prices into a string as a column in table storage
+    """
+    prices_string = ','.join(item for item in prices_list)
+
+    return prices_string
 
 
 #---------------------------------------------------------------------------------------# 
@@ -39,7 +63,7 @@ def upsert_replace(client, table_record):
     try:
         client.upsert_entity(mode=UpdateMode.REPLACE, entity=table_record)
     except HttpResponseError as he:
-        logging.error(he)
+        logging.error(he.error)
         raise he
 
 
@@ -51,9 +75,12 @@ def create_entity_from_price_record(price_rec):
             return: table storage entity record for the price
     """
     new_entity = {}
-    new_entity['PartitionKey'] = price_rec['Postcode'].split(' ')[0]
-    new_entity['RowKey'] = f"{price_rec['Postcode']}~{price_rec['Address']}"
-    # Prices must be a list of strings.
+    # force keys to be upper case.
+    new_entity['PartitionKey'] = price_rec['Postcode'].split(' ')[0].upper()
+    # Rowkey must be checked for invalid chars
+    row_key = f"{price_rec['Postcode']}~{price_rec['Address']}".upper()
+    new_entity['RowKey'] = format_rowkey(row_key)
+    # Prices must be a list type.
     new_entity['Prices'] = [(f"{price_rec['Date']}~{price_rec['Price']}")]
     new_entity['Address'] = price_rec['Address']
     new_entity['Postcode'] = price_rec['Postcode']
@@ -72,14 +99,12 @@ def price_exists(check_entity, new_price):
 
         Args:   
             check_entity: an existing table entity being checked (dict)
-            new_price: a date~price string in a list ['2022-04-07~345000']
+            new_price: a single date~price string in a list ['2022-04-07~345000']
             Return: True or False
     """
-    # convert all prices into lists for the check.
-    epl = ast.literal_eval(check_entity['Prices'])  
-    np = list(new_price)
+    epl = check_entity['Prices']
 
-    if np[0] in epl:
+    if new_price[0] in epl:
         return True
     else:
         return False
@@ -111,12 +136,10 @@ def merge_prices(entity_list):
     merged_price_entity = entity_list[0]
     price_set = set()
 
-    # loop through the enitty list and within each entity the price list
+    # loop through the enitty list and within each entity the prices list
     for next_entity in entity_list:
-        # we need the date~price strings such as ['2022-01-01~234500'] to be in a list type
-        epl = ast.literal_eval(str(next_entity['Prices']))  
-
-        for price in epl:
+    
+        for price in next_entity['Prices']:
             price_set.add(price)
 
     # turn the set into a list and replace the 'Prices' field in the returned dict.
@@ -148,7 +171,6 @@ def dedup_rowkey_and_merge_prices(batch):
         if len(templist) > 1:
             merged = merge_prices(templist)
             output_batch.append(merged)
-            logging.info(f'41. {k}')
         else:
             output_batch.append(templist[0])
     
@@ -164,23 +186,22 @@ def upsert_replace_batch(client, batch):
             batch: a list of table record dicts
     """
     ops_bat = []
-    rowkey_set = set()
+    dedup_bat = []
 
-    ops_bat = dedup_rowkey_and_merge_prices(batch)
+    dedup_bat = dedup_rowkey_and_merge_prices(batch)
 
-    # for rec in batch:
-    #     if rec['RowKey'] in rowkey_set:
-    #         logging.warn(f"Duplicate rowkey detected: {rec['RowKey']} has price {rec['Prices']}")
-    #     else:
-    #         next_entry = ("upsert", rec,  {"mode": "replace"})
-    #         ops_bat.append(next_entry)
-    #         rowkey_set.add(rec['RowKey'])
+    for rec in dedup_bat:
+        # cannot store an embedded list in table storage, convert to string.
+        rec['Prices'] = list_to_string(rec['Prices'])
+
+        next_entry = ("upsert", rec,  {"mode": "replace"})
+        ops_bat.append(next_entry)
 
     try:
-        logging.info(f'38. Fake batch insert')
-        #client.submit_transaction(operations=ops_bat)
+        client.submit_transaction(operations=ops_bat)
+        logging.info(f'STORAGE_TABLE. Batch inserted rows = {len(ops_bat)}')
     except TableTransactionError as txne:
-        logging.error(txne)
+        logging.error(txne.error)
         raise txne
 
 
@@ -201,13 +222,15 @@ def lookup_price_entity(client, new_entity):
 
     try:
         price_entity = client.get_entity(partition_key=partkey, row_key=rowkey)
+        # convert Prices string to a list for data manipulation.
+        price_entity['Prices'] = string_to_list(price_entity['Prices'])
 
         if price_exists(price_entity, new_entity['Prices']):
             return None
         else:
             # price does not exist
             to_be_merged = [price_entity, new_entity]
-            return merge_prices()
+            return merge_prices(to_be_merged)
 
     except ResourceNotFoundError as nfe:
         return new_entity
@@ -268,5 +291,5 @@ def table_batch(data, batch_size: int=100):
             yield data[i:i+batch_size]
 
     except Exception as ex:
-        logging.error(f'Failed to create a table batch: {ex}')
+        logging.error(f'Failed to create a table batch: {ex.error}')
         raise ex
