@@ -24,7 +24,7 @@ def read_and_decode(qc, scan_outcode) -> int:
                 qc.send_message(rec)
                 queue_count += 1
 
-    logging.info(f'Input records = {record_count}')
+    logging.info(f'GET_OUTCODE. Input records = {record_count}')
     return queue_count
 
 #---------------------------------------------------------------------------------------#
@@ -38,19 +38,17 @@ def main(msg: func.QueueMessage) -> None:
     outcode = msg.get_body().decode('utf-8')
     id = msg.id
     pop = msg.pop_receipt
-    
-    logging.info(f'Processing Outcode: {outcode}')
-    logging.info(f'Next visible at: {msg.time_next_visible.isoformat()}')
+    logging.info(f'GET_OUTCODE. Processing Outcode: {outcode}')
 
     # setup the outcode specific output queue
     scan_outcode = outcode.lower()
     queue_name = common.format_landreg_queue_name(scan_outcode)
-    logging.info(f'Queue Name = {queue_name}')
+    logging.info(f'GET_OUTCODE. Queue Name = {queue_name}')
     outcode_queue = storage_queue.get_queue_client(queue_name)
 
     # read the data and find all outcode records
     created_msg_count = read_and_decode(outcode_queue, scan_outcode)
-    logging.info(f'Queue Messages sent = {created_msg_count}')
+    logging.info(f'GET_OUTCODE. Queue Messages sent = {created_msg_count}')
 
     # create a message on the load-postcode queue.
     postcode_queue = storage_queue.get_queue_client(common.load_postcode_trigger_queue_name())
@@ -64,4 +62,4 @@ def main(msg: func.QueueMessage) -> None:
     duration = end_exec - start_exec
     hours, hrem = divmod(duration, 3600)
     mins, secs = divmod(hrem, 60)
-    logging.info(f'Execution Duration: {hours}hrs, {mins}mins, {round(secs,0)}secs')
+    logging.info(f'GET_OUTCODE. Execution Duration: {hours}hrs, {mins}mins, {round(secs,0)}secs')

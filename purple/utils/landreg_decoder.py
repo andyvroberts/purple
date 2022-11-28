@@ -70,6 +70,8 @@ def format_for_msg(rec):
             price_rec['Town'] = cols['Town']
             price_rec['District'] = cols['District']
             price_rec['County'] = cols['County']
+            price_rec['RecStatus'] = cols['RecStatus']
+
         else:
             price_rec = None
     
@@ -82,7 +84,7 @@ def get_outcode(rec):
        commas. Return only the Outcode (first part of the postcode)
         Args:   
             rec: a CSV string representing a data record of columns
-            Return: the Outcode and the Price of the record
+            Return: the tuple of Outcode and the Price of the record
     """
     in_cols = ['RowKey','Price','PriceDate','Postcode','PropertyType',\
                'NewBuild','Duration','Paon','Saon','Street','Locality',\

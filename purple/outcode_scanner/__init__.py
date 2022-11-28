@@ -35,9 +35,9 @@ def read_file_and_check_config():
             queue_count += 1
             storage_queue.send_message(qc, k)
 
-    logging.info(f'Number of outcodes = {len(outcode_check)}')
-    logging.info(f'File records read = {record_count}')
-    logging.info(f'{common.load_trigger_queue_name()} Queue messages sent = {queue_count}')
+    logging.info(f'OUTCODE_SCANNER. number of outcodes = {len(outcode_check)}')
+    logging.info(f'OUTCODE_SCANNER. file records read = {record_count}')
+    logging.info(f'OUTCODE_SCANNER. {common.load_trigger_queue_name()} Queue messages sent = {queue_count}')
     return record_count
 
 
@@ -55,4 +55,4 @@ def main(outcodeScanner: func.TimerRequest) -> None:
     duration = end_exec - start_exec
     hours, hrem = divmod(duration, 3600)
     mins, secs = divmod(hrem, 60)
-    logging.info(f'Execution Duration: {hours}hrs, {mins}mins, {round(secs,0)}secs')
+    logging.info(f'OUTCODE_SCANNER. Execution Duration: {hours}hrs, {mins}mins, {round(secs,0)}secs')

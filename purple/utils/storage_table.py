@@ -81,7 +81,7 @@ def create_entity_from_price_record(price_rec):
     row_key = f"{price_rec['Postcode']}~{price_rec['Address']}".upper()
     new_entity['RowKey'] = format_rowkey(row_key)
     # Prices must be a list type.
-    new_entity['Prices'] = [(f"{price_rec['Date']}~{price_rec['Price']}")]
+    new_entity['Prices'] = [(f"{price_rec['Date']}~{price_rec['Price']}~{price_rec['RecStatus']}")]
     new_entity['Address'] = price_rec['Address']
     new_entity['Postcode'] = price_rec['Postcode']
     new_entity['Locality'] = price_rec['Locality']
