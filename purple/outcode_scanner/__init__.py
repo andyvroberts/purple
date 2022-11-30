@@ -19,7 +19,7 @@ def read_file_and_check_config():
 
     # get references for the table client and queue client
     tc = storage_table.get_table_client(common.config_table_name())
-    qc = storage_queue.get_queue_client(common.load_outcode_trigger_queue_name())
+    qc = storage_queue.get_base64_queue_client(common.load_outcode_trigger_queue_name())
 
     for stream_rec in http_reader.stream_file():
         record_count += 1
@@ -37,7 +37,7 @@ def read_file_and_check_config():
 
     logging.info(f'OUTCODE_SCANNER. number of outcodes = {len(outcode_check)}')
     logging.info(f'OUTCODE_SCANNER. file records read = {record_count}')
-    logging.info(f'OUTCODE_SCANNER. {common.load_trigger_queue_name()} Queue messages sent = {queue_count}')
+    logging.info(f'OUTCODE_SCANNER. {qc.queue_name} Queue messages sent = {queue_count}')
     return record_count
 
 

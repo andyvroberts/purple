@@ -1,7 +1,7 @@
 import logging
 import os
 
-from azure.storage.queue import QueueClient
+from azure.storage.queue import QueueClient, TextBase64EncodePolicy
 from azure.core.exceptions import ResourceExistsError
 
 #---------------------------------------------------------------------------------------# 
@@ -21,6 +21,30 @@ def get_queue_client(name):
         pass
 
     return queue_client
+
+
+#---------------------------------------------------------------------------------------# 
+def get_base64_queue_client(name):
+    """ utility to get a reference to an azure storage queue.
+        try to create the queue in case it does not already exist.
+        Args:   
+            name: a queue name.
+            return: the queue client for later message inserts
+    """
+    storage_conn_str = os.getenv('LandregDataStorage')
+    queue_client = QueueClient.from_connection_string(
+        conn_str=storage_conn_str, 
+        queue_name= name,
+        message_encode_policy=TextBase64EncodePolicy()
+    )
+
+    try:
+        queue_client.create_queue()
+    except ResourceExistsError:
+        pass
+
+    return queue_client
+
 
 #---------------------------------------------------------------------------------------# 
 def send_message(client, payload):

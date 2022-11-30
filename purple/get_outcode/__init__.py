@@ -51,7 +51,7 @@ def main(msg: func.QueueMessage) -> None:
     logging.info(f'GET_OUTCODE. Queue Messages sent = {created_msg_count}')
 
     # create a message on the load-postcode queue.
-    postcode_queue = storage_queue.get_queue_client(common.load_postcode_trigger_queue_name())
+    postcode_queue = storage_queue.get_base64_queue_client(common.load_postcode_trigger_queue_name())
     storage_queue.send_message(postcode_queue, outcode)
 
     # delete the message from the load-outcodes queue as this workload has completed.

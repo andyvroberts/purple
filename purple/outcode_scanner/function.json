@@ -1,12 +1,11 @@
 {
   "scriptFile": "__init__.py",
-  "disabled": true,
   "bindings": [
     {
       "name": "outcodeScanner",
       "type": "timerTrigger",
       "direction": "in",
-      "schedule": "0 18 * * 3"
+      "schedule": "0 9 * * 4"
     }
   ]
 }
