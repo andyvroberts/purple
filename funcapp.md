@@ -162,11 +162,12 @@ https://docs.microsoft.com/en-us/azure/azure-functions/functions-develop-vs-code
 Add the business data storage account to our function app settings.  
 ```
 export businessdatastorage=$(az storage account show-connection-string -n $appstore -g $apprg -o tsv)
+export dataurl=http://prod.publicdata.landregistry.gov.uk.s3-website-eu-west-1.amazonaws.com/pp-monthly-update-new-version.csv
 
 az functionapp config appsettings set \
   --name $funcname \
   --resource-group $faresgrp \
-  --settings "LandregDataStorage=$businessdatastorage"
+  --settings "LandregDataStorage=$businessdatastorage PriceDataURL=$dataurl"
 ```
 
 At anytime you can list the settings to make sure everything exists as you expect.
@@ -209,7 +210,8 @@ Then use the Azure functions core tools command (not a CLI command).
 ```
 func azure functionapp publish $funcname
 ``` 
-
+Note: If you are re-deploying the function app after modifying it, you will need to ensure that the **Function App** is active in Azure, otherwise you will receive trigger synch errors.  
+  
 https://docs.microsoft.com/en-us/azure/azure-functions/functions-run-local?tabs=linux%2Ccsharp%2Cbash#project-file-deployment
 
 You can also use this command to publish the local any settings (local.settings.json) in which case you would not need to use the CLI command "az functionapp config appsettings set".

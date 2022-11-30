@@ -19,7 +19,7 @@ def read_file_and_check_config():
 
     # get references for the table client and queue client
     tc = storage_table.get_table_client(common.config_table_name())
-    qc = storage_queue.get_queue_client(common.load_trigger_queue_name())
+    qc = storage_queue.get_queue_client(common.load_outcode_trigger_queue_name())
 
     for stream_rec in http_reader.stream_file():
         record_count += 1
