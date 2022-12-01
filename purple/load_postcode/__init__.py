@@ -21,7 +21,7 @@ def lookup_price_and_prep_record(price_table, price_record):
 def store_prices(outcode):
     # set up the queue client
     queue_name = common.format_landreg_queue_name(outcode)
-    prices_queue = storage_queue.get_queue_client(queue_name)
+    prices_queue = storage_queue.get_base64_queue_client(queue_name)
     price_table = storage_table.get_table_client(common.price_table_name())
 
     # get multiple messages at one time (max 32), process them in a batch and then delete.
@@ -65,7 +65,7 @@ def main(pcodes: func.QueueMessage) -> None:
     # suppress or show messages from Azure loggers.
     logging.getLogger("azure.core.pipeline").setLevel(logging.ERROR)
     logging.getLogger("urllib3.connectionpool").setLevel(logging.ERROR)
-    #logging.getLogger('azure.storage.queue').setLevel(logging.DEBUG)
+    logging.getLogger('azure.storage.queue').setLevel(logging.ERROR)
 
     outcode = pcodes.get_body().decode('utf-8').lower()
     id = pcodes.id
@@ -74,14 +74,14 @@ def main(pcodes: func.QueueMessage) -> None:
 
     # read the price records and process them
     stored = store_prices(outcode)
-    logging.info(f'LOAD_POSTCODE. Table records created or modified = {stored}')
+    logging.info(f'LOAD_POSTCODE for {outcode}. Table records created or modified = {stored}')
 
     # delete the message from the load-postcodes queue as this workload has completed.
-    trigger_queue = storage_queue.get_queue_client(common.load_postcode_trigger_queue_name())
+    trigger_queue = storage_queue.get_base64_queue_client(common.load_postcode_trigger_queue_name())
     storage_queue.delete_message(trigger_queue, id, pop)
 
     end_exec = time.time()
     duration = end_exec - start_exec
     hours, hrem = divmod(duration, 3600)
     mins, secs = divmod(hrem, 60)
-    logging.info(f'LOAD_POSTCODE. Execution Duration: {hours}hrs, {mins}mins, {round(secs,0)}secs')
+    logging.info(f'LOAD_POSTCODE for {outcode}. Execution Duration: {hours}hrs, {mins}mins, {round(secs,0)}secs')

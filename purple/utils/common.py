@@ -24,13 +24,8 @@ def format_landreg_queue_name(suffix):
 def format_landreg_resource_name(suffix):
     return "landreg_" + suffix
 
-def config_ready_status():
-    return "A"
+def visibility_plus_five_min(seconds):
+    return 60 * 5 + seconds
 
-def landreg_monthly_update_url():
-    return "http://prod.publicdata.landregistry.gov.uk.s3-website-eu-west-1.amazonaws.com/pp-monthly-update-new-version.csv"
-
-def landreg_yearly_url(year):
-    base_name = "http://prod.publicdata.landregistry.gov.uk.s3-website-eu-west-1.amazonaws.com/pp-XXXX.csv"
-    file_url = base_name.replace('XXXX', year)
-    return file_url
+def visibility_plus_30_secs(seconds):
+    return 30 + seconds

@@ -67,11 +67,11 @@ Timing for single Outcode storage queue inserts
 | 2020 Yearly (Azure) | 2,338 | 55 secs. |
   
 To complete the design, there are now some additional steps required.   
-- Determine when the Outcode records for the monthly update file have changed.  Triger this process daily      
-    - Read the file and create a distinct list of Outcode RowKeys and at the end, hash each set per Outcode  
-    - Read configuration for the previous hash of each Outcode  
-    - If the hash is different, send a message to the "Execution" storage queue with the outcode as the payload  
-    - If the hash is different, replace the new hash value into the configuration record  
+- Determine when the Outcode records for the monthly update file have changed.  Triger this process on a timer.     
+    - Read the file and create a distinct list of Outcodes, totaling the price value of all price records as they are processed
+    - Read configuration for the previous price total of each Outcode  
+    - If the total is different, send a message to the "Execution" storage queue with the outcode as the payload  
+    - If the total is different, replace the new total value into the configuration record  
     - Create a Function App that is triggered by a message in the "Execution" storage queue and process the insert for the outcode given
     - Execute the Outcode specific Queue insert process
   
@@ -94,14 +94,14 @@ Table storage proved to be so easy to use, I decided to also make it the price r
 
 Price records:
 - There should only be 1 record per property
-- Prices should be stored in a column as a list (array) of key/value pairs (date: price)
+- Prices should be stored in a column as a list (array) of tuples (date:price:rectype)
 - The partition key should be the Postcode
 - The row key should be the address
     
 Note: for the 2019 price file, the outcode CR0 has approximatly 1,100 distinct postcodes from the 2,133 records.  
    
 ### Update 6  
-Git branch "price-batch"  
+Git branch "price-table" & "price-table2"  
 We encountered another timing issue when inserting many rows into Azure table storage.  A single threaded python process can insert approximately 1000 rows within a 5-minute window, although the this leaves a narrow margin of safety.   
 
 There are only 2 ways to increase table storage insert performance.  Either parallel process or insert in batches of 100.  We will choose to insert price records in batches but this means we must alter our partition key, as all records belonging ot a single batch insert must be for the same partition key.
@@ -109,7 +109,7 @@ There are only 2 ways to increase table storage insert performance.  Either para
 Price records:
 - Partition key is outcode (already our grouping in queue's by outcode)
 - Row key is now the postcode followed by the address
-- Address should also now be stored as an additional non-key column
+- Address and postcode should also now be stored as an additional non-key column
     
 
 

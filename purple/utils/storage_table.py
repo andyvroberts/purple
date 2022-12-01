@@ -241,7 +241,7 @@ def lookup_price_entity(client, new_entity):
 
 
 #---------------------------------------------------------------------------------------# 
-def have_outcode_rows_changed(client, partkey, rowkey, total_value, ready_status):
+def have_outcode_rows_changed(client, partkey, rowkey, total_value):
     """ read the configuration record for an outcode and if the total price is a different 
         value then return true, otherwise return false.
         Args: 
@@ -254,7 +254,6 @@ def have_outcode_rows_changed(client, partkey, rowkey, total_value, ready_status
     this_row['PartitionKey'] = partkey
     this_row['RowKey'] = rowkey
     this_row['Total'] = total_value
-    this_row['Status'] = ready_status
 
     try:
         entity = client.get_entity(partition_key=partkey, row_key=rowkey)

@@ -1,11 +1,11 @@
 import logging
 import os
 
-from azure.storage.queue import QueueClient, TextBase64EncodePolicy
+from azure.storage.queue import QueueClient, TextBase64EncodePolicy, TextBase64DecodePolicy
 from azure.core.exceptions import ResourceExistsError
 
 #---------------------------------------------------------------------------------------# 
-def get_queue_client(name):
+def get_client(name):
     """ utility to get a reference to an azure storage queue.
         try to create the queue in case it does not already exist.
         Args:   
@@ -25,7 +25,8 @@ def get_queue_client(name):
 
 #---------------------------------------------------------------------------------------# 
 def get_base64_queue_client(name):
-    """ utility to get a reference to an azure storage queue.
+    """ utility to get a reference to an azure storage queue client which reads and
+        writes text converted to base64 (binary) data.
         try to create the queue in case it does not already exist.
         Args:   
             name: a queue name.
@@ -35,7 +36,8 @@ def get_base64_queue_client(name):
     queue_client = QueueClient.from_connection_string(
         conn_str=storage_conn_str, 
         queue_name= name,
-        message_encode_policy=TextBase64EncodePolicy()
+        message_encode_policy=TextBase64EncodePolicy(),
+        message_decode_policy=TextBase64DecodePolicy()
     )
 
     try:
@@ -47,14 +49,17 @@ def get_base64_queue_client(name):
 
 
 #---------------------------------------------------------------------------------------# 
-def send_message(client, payload):
+def send_message(client, payload, vistime: int=0):
     """ send a message to a queue.
+        as we use base64 encoding, all payloads must be strings to avoid TypeError
         Args:   
             client: the storage queue client
             payload: a list of the payload data
+            vistime: the visibility timeout in seconds
             return: None
     """
-    client.send_message(payload)
+    string_payload = str(payload)
+    client.send_message(string_payload, visibility_timeout=vistime)
 
 
 #---------------------------------------------------------------------------------------# 

@@ -13,9 +13,9 @@ from utils import common
 def read_file_and_check_config():
     record_count = 0
     queue_count = 0
+    vis_timeout = 0
     outcode_check = defaultdict(float)
     partition_key = common.config_outcode_changes_partition()
-    outcode_status = common.config_ready_status()
 
     # get references for the table client and queue client
     tc = storage_table.get_table_client(common.config_table_name())
@@ -31,9 +31,10 @@ def read_file_and_check_config():
     for k, v in outcode_check.items():
         row_key = common.format_landreg_queue_name(k)
         
-        if storage_table.have_outcode_rows_changed(tc, partition_key, row_key, v, outcode_status):
+        if storage_table.have_outcode_rows_changed(tc, partition_key, row_key, v):
             queue_count += 1
-            storage_queue.send_message(qc, k)
+            vis_timeout = common.visibility_plus_30_secs(vis_timeout)
+            storage_queue.send_message(qc, k, vis_timeout)
 
     logging.info(f'OUTCODE_SCANNER. number of outcodes = {len(outcode_check)}')
     logging.info(f'OUTCODE_SCANNER. file records read = {record_count}')
@@ -47,7 +48,7 @@ def main(outcodeScanner: func.TimerRequest) -> None:
     # suppress or show messages from Azure loggers.
     logging.getLogger("azure.core.pipeline").setLevel(logging.ERROR)
     logging.getLogger("urllib3.connectionpool").setLevel(logging.ERROR)
-    #logging.getLogger('azure.storage.queue').setLevel(logging.DEBUG)
+    logging.getLogger('azure.storage.queue').setLevel(logging.ERROR)
     
     rec_count = read_file_and_check_config()
 

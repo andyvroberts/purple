@@ -167,7 +167,7 @@ export dataurl=http://prod.publicdata.landregistry.gov.uk.s3-website-eu-west-1.a
 az functionapp config appsettings set \
   --name $funcname \
   --resource-group $faresgrp \
-  --settings "LandregDataStorage=$businessdatastorage PriceDataURL=$dataurl"
+  --settings "LandregDataStorage=$businessdatastorage" "PriceDataURL=$dataurl"
 ```
 
 At anytime you can list the settings to make sure everything exists as you expect.
@@ -216,3 +216,50 @@ https://docs.microsoft.com/en-us/azure/azure-functions/functions-run-local?tabs=
 
 You can also use this command to publish the local any settings (local.settings.json) in which case you would not need to use the CLI command "az functionapp config appsettings set".
 
+
+# Funcapp Deploy rebuild after deletion
+Sometimes, you just need to delete the function app from azure and re-create it to clear a lot of bad stats and noise.  This assumes that you are leaving the resource groups, storage accounts and app insights components in place and you have not removed them. 
+
+Setup the env variables.
+```
+export apprg=UkLandregApp
+export appstore=uklandregappdata 
+
+export insightsname=uklandreg-insights
+export wkspacerg=UkLandregMonitor 
+
+export faresgrp=UkLandregFuncs  
+export fastoreacc=uklandregfuncsdata 
+export funcname=landreg-purple
+export instrumentationkey=$(az monitor app-insights component show --app $insightsname --resource-group $wkspacerg --query 'instrumentationKey' -o tsv)
+
+export businessdatastorage=$(az storage account show-connection-string -n $appstore -g $apprg -o tsv)
+export dataurl=http://prod.publicdata.landregistry.gov.uk.s3-website-eu-west-1.amazonaws.com/pp-monthly-update-new-version.csv
+```
+
+Create the function app
+```
+az functionapp create \
+  --name $funcname \
+  --resource-group $faresgrp \
+  --storage-account $fastoreacc \
+  --app-insights-key $instrumentationkey \
+  --consumption-plan-location uksouth \
+  --functions-version 4 \
+  --os-type linux \
+  --runtime python \
+  --runtime-version 3.9
+```
+
+Add the custom application settings 
+```
+az functionapp config appsettings set \
+  --name $funcname \
+  --resource-group $faresgrp \
+  --settings "LandregDataStorage=$businessdatastorage" "PriceDataURL=$dataurl"
+```
+
+Deploy  
+```
+func azure functionapp publish $funcname
+```

@@ -21,10 +21,10 @@ def read_and_decode(qc, scan_outcode) -> int:
         if rec is not None:
             outcode = rec['Postcode'].split(' ')[0].lower()
             if outcode == scan_outcode:
-                qc.send_message(rec)
+                storage_queue.send_message(qc, rec)
                 queue_count += 1
 
-    logging.info(f'GET_OUTCODE. Input records = {record_count}')
+    logging.info(f'GET_OUTCODE for {scan_outcode}. Input records = {record_count}')
     return queue_count
 
 #---------------------------------------------------------------------------------------#
@@ -33,7 +33,7 @@ def main(msg: func.QueueMessage) -> None:
     # suppress or show messages from Azure loggers.
     logging.getLogger("azure.core.pipeline").setLevel(logging.ERROR)
     logging.getLogger("urllib3.connectionpool").setLevel(logging.ERROR)
-    #logging.getLogger('azure.storage.queue').setLevel(logging.DEBUG)
+    logging.getLogger('azure.storage.queue').setLevel(logging.ERROR)
 
     outcode = msg.get_body().decode('utf-8')
     id = msg.id
@@ -44,22 +44,22 @@ def main(msg: func.QueueMessage) -> None:
     scan_outcode = outcode.lower()
     queue_name = common.format_landreg_queue_name(scan_outcode)
     logging.info(f'GET_OUTCODE. Queue Name = {queue_name}')
-    outcode_queue = storage_queue.get_queue_client(queue_name)
+    outcode_queue = storage_queue.get_base64_queue_client(queue_name)
 
     # read the data and find all outcode records
     created_msg_count = read_and_decode(outcode_queue, scan_outcode)
-    logging.info(f'GET_OUTCODE. Queue Messages sent = {created_msg_count}')
+    logging.info(f'GET_OUTCODE for {scan_outcode}. Queue Messages sent = {created_msg_count}')
 
     # create a message on the load-postcode queue.
     postcode_queue = storage_queue.get_base64_queue_client(common.load_postcode_trigger_queue_name())
     storage_queue.send_message(postcode_queue, outcode)
 
     # delete the message from the load-outcodes queue as this workload has completed.
-    trigger_queue = storage_queue.get_queue_client(common.load_outcode_trigger_queue_name())
+    trigger_queue = storage_queue.get_base64_queue_client(common.load_outcode_trigger_queue_name())
     storage_queue.delete_message(trigger_queue, id, pop)
 
     end_exec = time.time()
     duration = end_exec - start_exec
     hours, hrem = divmod(duration, 3600)
     mins, secs = divmod(hrem, 60)
-    logging.info(f'GET_OUTCODE. Execution Duration: {hours}hrs, {mins}mins, {round(secs,0)}secs')
+    logging.info(f'GET_OUTCODE for {scan_outcode}. Execution Duration: {hours}hrs, {mins}mins, {round(secs,0)}secs')
