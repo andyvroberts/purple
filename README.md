@@ -1,5 +1,5 @@
 # Ingest Historical Land Registry Property Prices
-Ingest the UK land registry update file of sold residential property prices.  Store them in postcode specific blob files.  Create the application using Python.
+Ingest the UK land registry update file of sold residential property prices.  Store them in table storage.  Create the application using Python.
 
 ## Application Design
 [Read this file for the requirements, design choices and changes throughout the implementaton process](design.md)  
