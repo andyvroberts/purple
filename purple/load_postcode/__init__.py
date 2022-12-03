@@ -24,10 +24,10 @@ def store_prices(outcode):
     prices_queue = storage_queue.get_base64_queue_client(queue_name)
     price_table = storage_table.get_table_client(common.price_table_name())
 
-    # get multiple messages at one time (max 32), process them in a batch and then delete.
+    # get multiple messages at one time (max 32) to reduce I/O
     msgs = prices_queue.receive_messages(messages_per_page=32, visibility_timeout=60*5)
 
-    # set up batch collection
+    # set up price table batch collection
     operation_batch = []
     batch_count = 0
     total_count = 0

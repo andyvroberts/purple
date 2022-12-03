@@ -69,7 +69,7 @@ def upsert_replace(client, table_record):
 
 #---------------------------------------------------------------------------------------# 
 def create_entity_from_price_record(price_rec):
-    """ convert an input price price record into the format required for table storage.
+    """ convert an input price record into the format required for table storage.
         Args:   
             price_rec: the input source format
             return: table storage entity record for the price
@@ -153,7 +153,7 @@ def merge_prices(entity_list):
 #---------------------------------------------------------------------------------------#
 def dedup_rowkey_and_merge_prices(batch):
     """
-        A batch can have duplicate rowkeys.  If so, merge all the prices into a single
+        A batch can have duplicate rowkeys.  If so, merge their prices into a single
         record and discard the remaining duplicates.
         Args:   
             batch: the input list of table entity records

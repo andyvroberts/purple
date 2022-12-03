@@ -111,5 +111,19 @@ Price records:
 - Row key is now the postcode followed by the address
 - Address and postcode should also now be stored as an additional non-key column
     
+### Update 7
+Git branch "main"  
+As queue triggers expect the payload to be base64 encoded, so make sure that any message you put on a queue which acts as an orchestration trigger is encoded properly.  
 
+Also, using Azure log analytics workspace has a fixed cost associated, and the table storage tables that are inserted during log capture cannot be truncated easily.  For these reasons we are going to remove the logging workspace and let Azure created a default application insights instance within the function app resource group.  
+
+Running the end-to-end process locally results in a large parallel effort to execute 2,300 functions to load records by outcodes into the individual queue's and then 2,300 functions to convert and load those into table storage.  
+In order to slow this down and monitor the executing functions, we have set the visiblity timeout of messages being created on the load-outcode queue to + 30 seconds on each consecutive outcode record set.  This has the effect of spacing out the executions.   
+
+### Update 8
+Remove the increasing visibilty timeout on the load-outcode queue.  Set the config to load the first avaialable yearly price file in the PriceDataURL setting.  This begins with 1995.
+
+Set the schedule of the outcode_scanner to run once a week on a Monday at 9am.
+
+publish the function app to Azure.
 
