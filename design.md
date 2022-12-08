@@ -90,13 +90,23 @@ Azure *Table storage* has these limitations:
 Table storage records can also be inserted in batches of 100 records.  Use this feature to reduce the number of API calls when inserting config.
   
 ### Update 5
-Table storage proved to be so easy to use, I decided to also make it the price record storage medium, replacing the previous design choice of blobs.  The additinal benefits of this are the ability to query rows by partition + row keys and to perform upsert (insert if now, else update) operations on rows.
+Table storage proved to be so easy to use, I decided to also make it the price record storage medium, replacing the previous design choice of blobs.  The additinal benefits of this are the ability to query rows by partition + row keys and to perform upsert (insert if new, else update) operations on rows.
 
 Price records:
 - There should only be 1 record per property
 - Prices should be stored in a column as a list (array) of tuples (date:price:rectype)
 - The partition key should be the Postcode
 - The row key should be the address
+
+This has also changed our NFR list:  
+| Requirement | Azure Choice | Notes |
+|:-------------|:--------------|:-------|
+| REQ1/2/3 | Table Storage | create a key-value pair data entity to group all properties within a postcode, within an outcode |
+| NFR1 | Table Storage | low-cost storage |
+| NFR1 | Function | low-cost serverless compute (free montly executions) |
+| NFR2 | Queue Storage | use as an intermediate store (functions are too limited for large memory grouping/sorting operations) |
+| NFR3 | Table Storage | groups many property prices into a single address data entity and so helps to de-duplicates data (rows) |
+| NFR4 | Function | can scale out to parallel executions using queue storage as an orchestration mechanism, ensuring data is appropriately partitioned |
     
 Note: for the 2019 price file, the outcode CR0 has approximatly 1,100 distinct postcodes from the 2,133 records.  
    
