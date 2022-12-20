@@ -6,7 +6,7 @@ import os
 # ---------------------------------------------------------------------------------------#
 
 
-def stream_file():
+def stream_file_for_price_config():
     """create a generator to stream-read HTTP file lines (records). 
         https://2.python-requests.org/en/master/user/advanced/#id9
         Args:
@@ -18,8 +18,7 @@ def stream_file():
         with requests.get(url, stream=True) as f:
             for line in f.iter_lines():
                 if line:
-                    csv_text = line.decode('utf-8')
-                    yield csv_text
+                    yield format_price_config(line.decode('utf-8'))
 
     except requests.RequestException as ex:
         logging.error('Unable to load data from HTTP: {}'.format(ex))
@@ -112,22 +111,21 @@ def format_price_rec(rec):
 def format_price_config(rec):
     """for CSV files, decode a single line that may be quote delimited with embedded 
        commas. Return the record as a dict with only the data you want.
-        Args:   
+        Args:   s
             rec: a CSV string representing a data record of columns
-            Return: the dict of needed column names and values
+            Return: a tuple of the outcode and the property price
     """
     in_cols = ['RowKey', 'Price', 'PriceDate', 'Postcode', 'PropertyType',
                'NewBuild', 'Duration', 'Paon', 'Saon', 'Street', 'Locality',
                'Town', 'District', 'County', 'PpdCategory', 'RecStatus']
 
-    out_cols = ['Price', 'Postcode']
-
     decoded_rec = csv.DictReader([rec], in_cols)
-    # shallow copy the next (actually, the only one) dictreader entry
-    in_dict = next(decoded_rec).copy()
-    # use filter() function to remove unwanted columns
-    # (note, t[0] identifies the keys from in_dict but you could use t[1] for the values)
-    out_dict = {k: v for k, v in filter(
-        lambda t: t[0] in out_cols, in_dict.items())}
+    rec_outcode = None
+    rec_price = 0
 
-    return out_dict
+    for cols in decoded_rec:
+        if len(cols['Postcode']) > 0:
+            rec_price = int(cols['Price'])
+            rec_outcode = cols['Postcode'].split(' ')[0].lower()
+
+    return rec_outcode, rec_price
