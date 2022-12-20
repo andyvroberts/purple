@@ -8,7 +8,9 @@ from azure.core.exceptions import ResourceExistsError
 from azure.core.exceptions import HttpResponseError
 from azure.core.exceptions import ResourceNotFoundError
 
-#---------------------------------------------------------------------------------------# 
+# ---------------------------------------------------------------------------------------#
+
+
 def get_table_client(name):
     """ utility to get a reference to an azure storage table.  
         try to create the table in case it does not already exist.
@@ -28,14 +30,14 @@ def get_table_client(name):
     return table_client
 
 
-#---------------------------------------------------------------------------------------#
+# ---------------------------------------------------------------------------------------#
 def format_rowkey(row_key):
     """ remove characters that cannot be included in a RowKey value
     """
-    return row_key.replace('\\',' ').replace('/',' ').replace('#','').replace('?','')
+    return row_key.replace('\\', ' ').replace('/', ' ').replace('#', '').replace('?', '')
 
 
-#---------------------------------------------------------------------------------------#
+# ---------------------------------------------------------------------------------------#
 def string_to_list(prices_string):
     """ convert the retrieved table entity prices string into a python list type
     """
@@ -44,7 +46,7 @@ def string_to_list(prices_string):
     return list(prices_array)
 
 
-#---------------------------------------------------------------------------------------#
+# ---------------------------------------------------------------------------------------#
 def list_to_string(prices_list):
     """ convert a list of prices into a string as a column in table storage
     """
@@ -53,7 +55,7 @@ def list_to_string(prices_list):
     return prices_string
 
 
-#---------------------------------------------------------------------------------------# 
+# ---------------------------------------------------------------------------------------#
 def upsert_replace(client, table_record):
     """ utility to upsert a table record
         Args:   
@@ -67,7 +69,7 @@ def upsert_replace(client, table_record):
         raise he
 
 
-#---------------------------------------------------------------------------------------# 
+# ---------------------------------------------------------------------------------------#
 def create_entity_from_price_record(price_rec):
     """ convert an input price record into the format required for table storage.
         Args:   
@@ -81,7 +83,8 @@ def create_entity_from_price_record(price_rec):
     row_key = f"{price_rec['Postcode']}~{price_rec['Address']}".upper()
     new_entity['RowKey'] = format_rowkey(row_key)
     # Prices must be a list type.
-    new_entity['Prices'] = [(f"{price_rec['Date']}~{price_rec['Price']}~{price_rec['RecStatus']}")]
+    new_entity['Prices'] = [
+        (f"{price_rec['Date']}~{price_rec['Price']}~{price_rec['RecStatus']}")]
     new_entity['Address'] = price_rec['Address']
     new_entity['Postcode'] = price_rec['Postcode']
     new_entity['Locality'] = price_rec['Locality']
@@ -92,7 +95,7 @@ def create_entity_from_price_record(price_rec):
     return new_entity
 
 
-#---------------------------------------------------------------------------------------#
+# ---------------------------------------------------------------------------------------#
 def price_exists(check_entity, new_price):
     """
         does the table entity already contain the new price.
@@ -110,7 +113,7 @@ def price_exists(check_entity, new_price):
         return False
 
 
-#---------------------------------------------------------------------------------------#
+# ---------------------------------------------------------------------------------------#
 def merge_prices(entity_list):
     """
         The first record in the input list will be returned, with any additional prices
@@ -138,7 +141,7 @@ def merge_prices(entity_list):
 
     # loop through the enitty list and within each entity the prices list
     for next_entity in entity_list:
-    
+
         for price in next_entity['Prices']:
             price_set.add(price)
 
@@ -150,7 +153,7 @@ def merge_prices(entity_list):
     return merged_price_entity
 
 
-#---------------------------------------------------------------------------------------#
+# ---------------------------------------------------------------------------------------#
 def dedup_rowkey_and_merge_prices(batch):
     """
         A batch can have duplicate rowkeys.  If so, merge their prices into a single
@@ -163,8 +166,8 @@ def dedup_rowkey_and_merge_prices(batch):
     templist = []
     # can only groupby contiguous records so sort first.
     sorted_bat = sorted(batch, key=lambda x: x['RowKey'])
-    
-    # do the groupby and if we get a group with more than 1 record, send it off for 
+
+    # do the groupby and if we get a group with more than 1 record, send it off for
     # the price merging process.
     for k, g in groupby(sorted_bat, key=lambda x: x['RowKey']):
         templist = list(g)
@@ -173,10 +176,12 @@ def dedup_rowkey_and_merge_prices(batch):
             output_batch.append(merged)
         else:
             output_batch.append(templist[0])
-    
+
     return output_batch
 
-#---------------------------------------------------------------------------------------# 
+# ---------------------------------------------------------------------------------------#
+
+
 def upsert_replace_batch(client, batch):
     """ utility to upsert a batch.  Do not insert duplicate RowKey values.
         1. Limited to 100 table entity records
@@ -205,7 +210,7 @@ def upsert_replace_batch(client, batch):
         raise txne
 
 
-#---------------------------------------------------------------------------------------# 
+# ---------------------------------------------------------------------------------------#
 def lookup_price_entity(client, new_entity):
     """ read the price table for an existing record.
         if the record is found and the new price already exists return None.
@@ -240,7 +245,7 @@ def lookup_price_entity(client, new_entity):
         raise re
 
 
-#---------------------------------------------------------------------------------------# 
+# ---------------------------------------------------------------------------------------#
 def have_outcode_rows_changed(client, partkey, rowkey, total_value):
     """ read the configuration record for an outcode and if the total price is a different 
         value then return true, otherwise return false.
@@ -259,14 +264,14 @@ def have_outcode_rows_changed(client, partkey, rowkey, total_value):
         entity = client.get_entity(partition_key=partkey, row_key=rowkey)
 
         if entity['Total'] != this_row['Total']:
-            client.insert_or_replace(this_row)
+            upsert_replace(client, this_row)
             return True
         else:
             return False
 
     except ResourceNotFoundError as nfe:
         # expected if no record in the table, create one and return true.
-        client.create_entity(this_row)
+        upsert_replace(client, this_row)
         return True
 
     except HttpResponseError as re:
@@ -275,8 +280,8 @@ def have_outcode_rows_changed(client, partkey, rowkey, total_value):
         raise re
 
 
-#-----------------------------------------------------------------------------------#
-def table_batch(data, batch_size: int=100):
+# -----------------------------------------------------------------------------------#
+def table_batch(data, batch_size: int = 100):
     """return a list of records of the required batch size until the input list is 
     exhausted.
 
