@@ -6,11 +6,11 @@ import os
 # ---------------------------------------------------------------------------------------#
 
 
-def stream_file_for_price_config():
+def stream_file():
     """create a generator to stream-read HTTP file lines (records). 
         https://2.python-requests.org/en/master/user/advanced/#id9
         Args:
-            Return: a generator of file records
+            Return: a generator of tuples (outcode & price)
     """
     url = os.getenv('PriceDataURL')
     logging.info(f'Streaming price file from {url}.')
@@ -18,7 +18,32 @@ def stream_file_for_price_config():
         with requests.get(url, stream=True) as f:
             for line in f.iter_lines():
                 if line:
-                    yield format_price_config(line.decode('utf-8'))
+                    csv_text = line.decode('utf-8')
+                    yield csv_text
+
+    except requests.RequestException as ex:
+        logging.error('Unable to load data from HTTP: {}'.format(ex))
+        raise ex
+
+# ---------------------------------------------------------------------------------------#
+
+
+def stream_file_for_price_config():
+    """create a generator to stream-read HTTP file lines (records). 
+        https://2.python-requests.org/en/master/user/advanced/#id9
+        Args:
+            Return: a generator of tuples (outcode & price)
+    """
+    url = os.getenv('PriceDataURL')
+    logging.info(f'Streaming price file from {url}.')
+    try:
+        with requests.get(url, stream=True) as f:
+            for line in f.iter_lines():
+                if line:
+                    oc, pr = format_price_config(line.decode('utf-8'))
+                    # ignore records without a populated postcode
+                    if oc is not None:
+                        yield oc, pr
 
     except requests.RequestException as ex:
         logging.error('Unable to load data from HTTP: {}'.format(ex))

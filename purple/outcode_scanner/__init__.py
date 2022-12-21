@@ -25,26 +25,36 @@ def read_file_and_check_config():
 
     for outcode, price in http_reader.stream_file_for_price_config():
         record_count += 1
+        outcode_check[outcode] += price
 
-        if outcode is not None:
-            outcode_check[outcode] += price
+    # for stream_rec in http_reader.stream_file():
+    #     record_count += 1
+    #     outcode, price = http_reader.format_price_config(stream_rec)
 
-    for k, v in outcode_check.items():
-        row_key = common.format_landreg_queue_name(k)
-
-        if storage_table.have_outcode_rows_changed(tc, partition_key, row_key, v):
-            queue_count += 1
-            vis_timeout = common.visibility_plus_30_secs(vis_timeout)
-            storage_queue.send_message(qc, k, vis_timeout)
+    #     if outcode is not None:
+    #         outcode_check[outcode] += price
 
     logging.info(f'OUTCODE_SCANNER. number of outcodes = {len(outcode_check)}')
+
+    blob_output = str(outcode_check)
+    logging.info(blob_output)
+
+    # for k, v in outcode_check.items():
+    #     row_key = outcode
+
+    #     if storage_table.have_outcode_rows_changed(tc, partition_key, row_key, v):
+    #         queue_count += 1
+    #         # vis_timeout = common.visibility_plus_30_secs(vis_timeout)
+    #         storage_queue.send_message(qc, k, vis_timeout)
+
     logging.info(f'OUTCODE_SCANNER. file records read = {record_count}')
     logging.info(
         f'OUTCODE_SCANNER. {qc.queue_name} Queue messages sent = {queue_count}')
     return record_count
 
-
 # ---------------------------------------------------------------------------------------#
+
+
 def main(outcodeScanner: func.TimerRequest) -> None:
     start_exec = time.time()
     # suppress or show messages from Azure loggers.

@@ -2,7 +2,7 @@ import logging
 import os
 from itertools import groupby
 
-from azure.data.tables import TableClient, UpdateMode, TableTransactionError
+from azure.data.tables import TableClient, TableTransactionError
 
 from azure.core.exceptions import ResourceExistsError
 from azure.core.exceptions import HttpResponseError
@@ -53,20 +53,6 @@ def list_to_string(prices_list):
     prices_string = ','.join(item for item in prices_list)
 
     return prices_string
-
-
-# ---------------------------------------------------------------------------------------#
-def upsert_replace(client, table_record):
-    """ utility to upsert a table record
-        Args:   
-            client: the azure table client for the configuration table
-            table_record: a table record dict, including partition/row keys
-    """
-    try:
-        client.upsert_entity(mode=UpdateMode.REPLACE, entity=table_record)
-    except HttpResponseError as he:
-        logging.error(he.error)
-        raise he
 
 
 # ---------------------------------------------------------------------------------------#
@@ -264,14 +250,14 @@ def have_outcode_rows_changed(client, partkey, rowkey, total_value):
         entity = client.get_entity(partition_key=partkey, row_key=rowkey)
 
         if entity['Total'] != this_row['Total']:
-            upsert_replace(client, this_row)
+            client.update_entity(this_row)
             return True
         else:
             return False
 
     except ResourceNotFoundError as nfe:
         # expected if no record in the table, create one and return true.
-        upsert_replace(client, this_row)
+        client.create_entity(this_row)
         return True
 
     except HttpResponseError as re:
