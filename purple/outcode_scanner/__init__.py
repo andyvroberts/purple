@@ -1,11 +1,13 @@
 import time
 import logging
+import ast
 from collections import defaultdict
 import azure.functions as func
 
 from utils import http_reader
 from utils import storage_table
 from utils import storage_queue
+from utils import storage_blob
 from utils import common
 
 # ---------------------------------------------------------------------------------------#
@@ -18,10 +20,15 @@ def read_file_and_check_config():
     outcode_check = defaultdict(float)
     partition_key = common.config_outcode_changes_partition()
 
-    # get references for the table client and queue client
+    # get references for the storage clients
     tc = storage_table.get_table_client(common.config_table_name())
     qc = storage_queue.get_base64_queue_client(
         common.load_outcode_trigger_queue_name())
+    bc = storage_blob.get_client(
+        common.blob_container(), common.blob_file_name())
+
+    config_str = storage_blob.read_config(bc)
+    config = ast.literal_eval(config_str)
 
     for outcode, price in http_reader.stream_file_for_price_config():
         record_count += 1
@@ -36,8 +43,13 @@ def read_file_and_check_config():
 
     logging.info(f'OUTCODE_SCANNER. number of outcodes = {len(outcode_check)}')
 
-    blob_output = str(outcode_check)
-    logging.info(blob_output)
+    for k, v in outcode_check.items():
+        if k in config:
+            if v != config[k]:
+                logging.info(f"{k} different amount {v} != {config[k]}")
+
+    # blob_output = str(dict(outcode_check))
+    # storage_blob.store_config(bc, blob_output)
 
     # for k, v in outcode_check.items():
     #     row_key = outcode

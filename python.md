@@ -95,6 +95,8 @@ From the activated venv, first install the Azure Function requirements from the 
 ```
 py -m pip install -r requirements.txt
 py -m pip install azure-storage-queue
+py -m pip install azure-data-tables
+py -m pip install azure-storage-blob
 ```
 
 
