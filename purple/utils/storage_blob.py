@@ -2,13 +2,13 @@ import logging
 import os
 
 from azure.storage.blob import BlobClient
-from azure.core.exceptions import ResourceExistsError
+from azure.core.exceptions import ResourceNotFoundError
 
 # ---------------------------------------------------------------------------------------#
 
 
 def get_client(container, blob_name):
-    """ utility to get a reference to an azure blob storage.
+    """ utility to get a reference to a specific blob file.
         Args:
             container: the blob folder
             blob_name: the blob file name
@@ -42,9 +42,10 @@ def read_config(client):
 
         Args:
             client: the blob storage client
-            return: the string of the blob contents
+            return: the string of the blob contents or an empty dict as a string
     """
-    # blob_str = client.download_blob().readall().decode("utf-8")
-    blob_str = client.download_blob().content_as_text()
-
-    return blob_str
+    try:
+        blob_str = client.download_blob().content_as_text()
+        return blob_str
+    except ResourceNotFoundError as nfe:
+        return "{}"

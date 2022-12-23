@@ -5,8 +5,7 @@
       "name": "outcodeScanner",
       "type": "timerTrigger",
       "direction": "in",
-      "schedule": "0 9 * * MON",
-      "runOnStartup": true
+      "schedule": "0 9 * * MON"
     }
   ]
 }

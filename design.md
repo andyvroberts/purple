@@ -137,3 +137,15 @@ Set the schedule of the outcode_scanner to run once a week on a Monday at 9am.
 
 publish the function app to Azure.
 
+### Update 9
+After considering how to reduce queue usage and reduce execution time, the following design changes were made.  
+
+**(A)** The outcode scanner switched to using a blob file to contain the list of outcodes and their summed prices.
+This results in a large reduction in execution time, as the blob is read on startup and written out again at the end of the process.  Avoiding 2,300 reads and (potential) updates saved approximately 3 minutes.  
+
+**(B)** The middle collection of queues holding outcode-specific sets of price records was removed.  The process which populated those queues not directly inserts the set of outcode prices into table storage.  
+This results in reduction to just a single queue used as the trigger for a distributed load process.  
+
+As before, the schedule of the outcode_scanner is set to run once a week.
+
+

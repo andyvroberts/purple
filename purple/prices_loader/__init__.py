@@ -6,7 +6,6 @@ import azure.functions as func
 
 from utils import http_reader
 from utils import storage_table
-from utils import storage_queue
 from utils import common
 
 # ---------------------------------------------------------------------------------------#
@@ -79,9 +78,7 @@ def main(msg: func.QueueMessage) -> None:
     )
 
     # delete the message from the load-outcodes queue as this workload has completed.
-    trigger_queue = storage_queue.get_base64_queue_client(
-        common.load_outcode_trigger_queue_name())
-    storage_queue.delete_message(trigger_queue, id, pop)
+    # the SDK automatically deletes triggering messages which complete without error.
 
     end_exec = time.time()
     duration = end_exec - start_exec

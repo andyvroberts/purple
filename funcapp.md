@@ -225,12 +225,12 @@ Sometimes, you just need to delete the function app from azure and re-create it 
 export apprg=UkLandregApp
 export appstore=uklandregappdata
 
-export faresgrp=Purple001  
-export fastoreacc=purpledata001 
-export funcname=PurpleFunc001
+export faresgrp=Purple002  
+export fastoreacc=purpledata002 
+export funcname=PurpleFunc002
 
 export businessdatastorage=$(az storage account show-connection-string -n $appstore -g $apprg -o tsv)
-export dataurl=http://prod.publicdata.landregistry.gov.uk.s3-website-eu-west-1.amazonaws.com/pp-monthly-update-new-version.csv
+export dataurl=ttp://prod.publicdata.landregistry.gov.uk.s3-website-eu-west-1.amazonaws.com/pp-1995.csv
 ```
 
 ## Function App

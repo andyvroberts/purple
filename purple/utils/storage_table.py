@@ -29,15 +29,17 @@ def get_table_client(name):
 
     return table_client
 
-
 # ---------------------------------------------------------------------------------------#
+
+
 def format_rowkey(row_key):
     """ remove characters that cannot be included in a RowKey value
     """
     return row_key.replace('\\', ' ').replace('/', ' ').replace('#', '').replace('?', '')
 
-
 # ---------------------------------------------------------------------------------------#
+
+
 def string_to_list(prices_string):
     """ convert the retrieved table entity prices string into a python list type
     """
@@ -45,8 +47,9 @@ def string_to_list(prices_string):
 
     return list(prices_array)
 
-
 # ---------------------------------------------------------------------------------------#
+
+
 def list_to_string(prices_list):
     """ convert a list of prices into a string as a column in table storage
     """
@@ -54,8 +57,9 @@ def list_to_string(prices_list):
 
     return prices_string
 
-
 # ---------------------------------------------------------------------------------------#
+
+
 def create_entity_from_price_record(price_rec):
     """ convert an input price record into the format required for table storage.
         Args:   
@@ -80,8 +84,9 @@ def create_entity_from_price_record(price_rec):
 
     return new_entity
 
-
 # ---------------------------------------------------------------------------------------#
+
+
 def price_exists(check_entity, new_price):
     """
         does the table entity already contain the new price.
@@ -98,8 +103,9 @@ def price_exists(check_entity, new_price):
     else:
         return False
 
-
 # ---------------------------------------------------------------------------------------#
+
+
 def merge_prices(entity_list):
     """
         The first record in the input list will be returned, with any additional prices
@@ -138,8 +144,9 @@ def merge_prices(entity_list):
 
     return merged_price_entity
 
-
 # ---------------------------------------------------------------------------------------#
+
+
 def dedup_rowkey_and_merge_prices(batch):
     """
         A batch can have duplicate rowkeys.  If so, merge their prices into a single
@@ -195,8 +202,9 @@ def upsert_replace_batch(client, batch):
         logging.error(txne.error)
         raise txne
 
-
 # ---------------------------------------------------------------------------------------#
+
+
 def lookup_price_entity(client, new_entity):
     """ read the price table for an existing record.
         if the record is found and the new price already exists return None.
@@ -230,8 +238,9 @@ def lookup_price_entity(client, new_entity):
         logging.error(re.error)
         raise re
 
-
 # ---------------------------------------------------------------------------------------#
+
+
 def have_outcode_rows_changed(client, partkey, rowkey, total_value):
     """ read the configuration record for an outcode and if the total price is a different 
         value then return true, otherwise return false.
@@ -265,8 +274,9 @@ def have_outcode_rows_changed(client, partkey, rowkey, total_value):
         logging.error(re.error)
         raise re
 
-
 # -----------------------------------------------------------------------------------#
+
+
 def table_batch(data, batch_size: int = 100):
     """return a list of records of the required batch size until the input list is 
     exhausted.
