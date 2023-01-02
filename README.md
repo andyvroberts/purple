@@ -27,10 +27,11 @@ Sometimes a function app will timeout for an unknown reason. In these cases:
 Loading a 900k row dataset results in queue costs of approximately £0.75 per load.  Although this is by no means high, compared to table storage costs (£0.04) it is an order of magnitude larger.  We need to investigate queue storage options to see why this is the case.  
 
 ### Load 1995 Prices
-Resulted in 2,299 outcode messages being placed onto the queue for the prices load trigger function.   The duration of the loading was 2 hours and 10 minutes.  
+Resulted in 2,299 outcode messages being placed onto the queue for the prices load trigger function.   The overall duration of the load process was 2 hours and 10 minutes.  
 Prices Load Function ended up with:  
 - 550 Success
-- 5,651 Failures (each failed message was dequeued for retry operations, up to 5 times)
+- 5,651 Failures (each failed message was dequeued for retry operations, up to 5 times)  
+
 The high number of failures resulted from a) function time-out when they ran for longer than 5 minutes or b) HTTP errors retrieving the CSV file.  
 There are now 1,702 messages in the dead-letter queue.  
 
