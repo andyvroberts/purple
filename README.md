@@ -39,7 +39,7 @@ Using the default parallel execution options, a function app cannot cope with be
 According to the docs, Python functions on Linux can only scale out to a maximum of 100 concurrent instances.  
 https://learn.microsoft.com/en-us/azure/azure-functions/functions-scale#scale
 
-Replace the trigger queue visibiity from zero, to be in staggered 5-minute intervals to avoid overlaoding the function executions.
+Replace the trigger queue visibiity from zero, to be in staggered 30-second intervals to avoid overlaoding the function executions.
 
 ### Design Suitability
 This design is just an interesting excercise using queue's and table storage.  For production purposes (or if you have plenty of Azure credits) the correct approach would be to use a data-lake and data warehouse appliance such as Databricks or Synapse analytics.  

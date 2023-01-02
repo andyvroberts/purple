@@ -36,10 +36,12 @@ def read_file_and_check_config():
             if v != config[k]:
                 # outcode total value has changed so add to price-load trigger queue
                 queue_count += 1
+                vis_timeout = common.visibility_plus_30_secs(vis_timeout)
                 storage_queue.send_message(qc, k, vis_timeout)
         else:
             # outcode not in config so add to price-load trigger queue
             queue_count += 1
+            vis_timeout = common.visibility_plus_30_secs(vis_timeout)
             storage_queue.send_message(qc, k, vis_timeout)
 
     config_output = str(dict(outcode_check))
