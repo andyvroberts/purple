@@ -41,6 +41,20 @@ https://learn.microsoft.com/en-us/azure/azure-functions/functions-scale#scale
 
 Replace the trigger queue visibiity from zero, to be in staggered 30-second intervals to avoid overlaoding the function executions.
 
+Run the application insights query to determine success and failures.  
+```
+requests
+| where timestamp > ago(7d)
+| where success == False
+| where appName == 'PurpleFunc002'
+```
+
+Next Prices Load Function resulted in:
+- S2,291 Success
+- 317 Failures (> 5 minute execution duration)
+
+Automatic retries (up to 5 per queue message) during the load process mean that only 9 outcodes ended up in the poison queue.  These were manually added to the main queue where they ran to completion.
+
 ### Design Suitability
 This design is just an interesting excercise using queue's and table storage.  For production purposes (or if you have plenty of Azure credits) the correct approach would be to use a data-lake and data warehouse appliance such as Databricks or Synapse analytics.  
 
