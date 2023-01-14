@@ -50,7 +50,7 @@ requests
 ```
 
 Next Prices Load Function resulted in:
-- S2,291 Success
+- 2,291 Success
 - 317 Failures (> 5 minute execution duration)
 
 Automatic retries (up to 5 per queue message) during the load process mean that only 9 outcodes ended up in the poison queue.  These were manually added to the main queue where they ran to completion.
