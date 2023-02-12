@@ -43,3 +43,6 @@ def blob_file_name():
 
 def visibility_plus_30_secs(seconds):
     return 30 + seconds
+
+def visibility_plus_60_secs(seconds):
+    return 60 + seconds

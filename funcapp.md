@@ -267,7 +267,9 @@ az functionapp config appsettings set \
 ```
 
 ## Deploy
-Deploy  
+Deploy, if re-deploy also make sure you have defined the $funcname.
 ```
+export funcname=PurpleFunc002
+
 func azure functionapp publish $funcname
 ```
