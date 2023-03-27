@@ -1,1 +1,0 @@
-export PYTHONPATH=~/projects/purple/purple
