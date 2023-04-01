@@ -1,19 +1,17 @@
 import logging
 import requests
 import csv
-import os
 
 # ---------------------------------------------------------------------------------------#
 
 
-def stream_file_for_price_config():
+def stream_file_for_price_config(url):
     """create a generator to stream-read HTTP file lines (records). 
         https://2.python-requests.org/en/master/user/advanced/#id9
         Args:
+            url: the price file to scan
             Return: a generator of tuples (outcode & price)
     """
-    url = os.getenv('PriceDataURL')
-    logging.info(f'Streaming price file from {url}.')
     try:
         with requests.get(url, stream=True) as f:
             for line in f.iter_lines():
@@ -30,15 +28,14 @@ def stream_file_for_price_config():
 # ---------------------------------------------------------------------------------------#
 
 
-def stream_file_for_outcode(outcode):
+def stream_file_for_outcode(url, outcode):
     """create a generator to stream-read HTTP file lines (records). 
         https://2.python-requests.org/en/master/user/advanced/#id9
         Args:
+            url: the price file to scan
             outcode: the outcode of records to return.
             Return: a generator of file records
     """
-    url = os.getenv('PriceDataURL')
-    logging.info(f'Streaming price file from {url}.')
     try:
         with requests.get(url, stream=True) as f:
             for line in f.iter_lines():

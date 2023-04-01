@@ -1,8 +1,15 @@
+import os
+
 """ 
     Some utility functions that return constants or formatted names of resources.
 """
 
-# ---------------------------------------------------------------------------------------#
+
+def get_data_url():
+    env_url = os.getenv('PriceDataURL')
+    env_year = os.getenv('PriceDataYear')
+    url = env_url.replace('XXXX', env_year)
+    return url
 
 
 def config_table_name():
@@ -37,12 +44,13 @@ def blob_container():
     return "landreg"
 
 
-def blob_file_name():
-    return "outcode-config.txt"
+def blob_file_name(year):
+    return f"outcode-config-{year}.txt"
 
 
 def visibility_plus_30_secs(seconds):
     return 30 + seconds
+
 
 def visibility_plus_60_secs(seconds):
     return 60 + seconds

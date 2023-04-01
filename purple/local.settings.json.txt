@@ -6,6 +6,7 @@
     "AzureWebJobsStorage": "The storage account of the function app",
     "LandregDataStorage": "The storage account for the business data",
     "PriceDataURL": "http://prod.publicdata.landregistry.gov.uk.s3-website-eu-west-1.amazonaws.com/pp-monthly-update-new-version.csv"
-    "PriceDataURL": "http://prod.publicdata.landregistry.gov.uk.s3-website-eu-west-1.amazonaws.com/pp-2019.csv"
+    "PriceDataURL": "http://prod.publicdata.landregistry.gov.uk.s3-website-eu-west-1.amazonaws.com/pp-XXXX.csv"
+    "PriceDataYear": "2002"
   }
 }

@@ -1,3 +1,4 @@
+import os
 import time
 import logging
 import ast
@@ -18,16 +19,20 @@ def read_file_and_check_config():
     vis_timeout = 0
     outcode_check = defaultdict(float)
 
+    # identify the next data file url based on configuration settings
+    url = common.get_data_url()
+    logging.info(f'price file = {url}.')
+
     # get references for the storage clients
     qc = storage_queue.get_base64_queue_client(
         common.load_outcode_trigger_queue_name())
     bc = storage_blob.get_client(
-        common.blob_container(), common.blob_file_name())
+        common.blob_container(), common.blob_file_name(os.getenv('PriceDataYear')))
 
     config_str = storage_blob.read_config(bc)
     config = ast.literal_eval(config_str)
 
-    for outcode, price in http_reader.stream_file_for_price_config():
+    for outcode, price in http_reader.stream_file_for_price_config(url):
         record_count += 1
         outcode_check[outcode] += price
 

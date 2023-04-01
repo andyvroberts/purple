@@ -25,13 +25,16 @@ def store_prices(outcode):
     # set up the queue client
     price_table = storage_table.get_table_client(common.price_table_name())
 
+    # identify the next data file url based on configuration settings
+    url = common.get_data_url()
+
     # set up price table batch collection
     operation_batch = []
     batch_count = 0
     total_count = 0
     record_count = 0
 
-    for stream_rec in http_reader.stream_file_for_outcode(outcode):
+    for stream_rec in http_reader.stream_file_for_outcode(url, outcode):
         record_count += 1
         price_rec = lookup_price_and_prep_record(price_table, stream_rec)
 
