@@ -273,3 +273,25 @@ export funcname=PurpleFunc002
 
 func azure functionapp publish $funcname
 ```
+
+# Github Action to Deploy
+Follow the instructions here:  
+https://github.com/Azure/functions-action#using-publish-profile-as-deployment-credential-recommended  
+
+Add the publish profile contents from the Azure Function to github:  
+```
+Settings > Secrets & Variables > Actions > New reposiroty secret
+```
+In the YML file, make sure to run the deploy workflow ONLY when something in the actual function code has changed.   
+Accomplish by only including the specific code folders for the **on: push:** github action.  
+```
+on:
+  push:
+    branches:
+    - ["main"]
+    paths:
+    - 'purple/outcode_scanner/**'
+    - 'purple/prices_loader/**'
+    - 'purple/utils/**'
+```
+
