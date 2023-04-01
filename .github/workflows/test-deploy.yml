@@ -16,9 +16,9 @@
 #
 # For more samples to get started with GitHub Action workflows to deploy to Azure: https://github.com/Azure/actions-workflow-samples/tree/master/FunctionApp
 
-name: Python Deploy
+name: Python Test & Deploy
 
-# only run for changes 
+# only run for function app code changes (not docs, test or settings)
 on:
   push:
     branches:
@@ -34,8 +34,32 @@ env:
   PYTHON_VERSION: '3.9'                           # set this to the python version to use (e.g. '3.6', '3.7', '3.8')
 
 jobs:
+  run-tests:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: Set up Python 3.9
+      uses: actions/setup-python@v3
+      with:
+        python-version: "3.9"
+    - name: Install dependencies
+      run: |
+        cd purple
+        python -m pip install --upgrade pip
+        python -m pip install pytest
+        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+    - name: Test with pytest
+      run: |
+        pytest
+
+
+jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
+    # only run if tests job worked
+    needs: run-tests
+
     environment: dev
     steps:
     - name: 'Checkout GitHub Action'
