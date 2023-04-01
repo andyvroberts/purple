@@ -1,0 +1,9 @@
+{
+  "IsEncrypted": false,
+  "Values": {
+    "FUNCTIONS_WORKER_RUNTIME": "python",
+    "AzureWebJobsStorage": "DefaultEndpointsProtocol=https;AccountName=purpledata002;AccountKey=PcuFED1X1IZHHoh81vO2dqMzc5D908HIPKlpZdr1R83OsIZLaztSvRCWZWTF91kOmPR1dDTOigHh+AStN/S65g==;EndpointSuffix=core.windows.net",
+    "LandregDataStorage": "DefaultEndpointsProtocol=https;AccountName=uklandregappdata;AccountKey=mPxwczvq74cJfU9nqt5TMQ807TqWpXEh1Y8fpoR8JJq/jv1VUie9J7Qxp/BzM4sqazkD6dQVlmCb+ASt0sFtEg==;EndpointSuffix=core.windows.net",
+    "PriceDataURL": "http://prod.publicdata.landregistry.gov.uk.s3-website-eu-west-1.amazonaws.com/pp-2019.csv"
+  }
+}
