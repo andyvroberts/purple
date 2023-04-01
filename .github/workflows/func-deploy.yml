@@ -22,7 +22,7 @@ name: Python Deploy
 on:
   push:
     branches:
-    - ["main"]
+    - main
     paths:
     - 'purple/outcode_scanner/**'
     - 'purple/prices_loader/**'
