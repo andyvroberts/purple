@@ -27,6 +27,7 @@ def store_prices(outcode):
 
     # identify the next data file url based on configuration settings
     url = common.get_data_url()
+    logging.info(f'price file = {url}.')
 
     # set up price table batch collection
     operation_batch = []
