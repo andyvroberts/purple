@@ -98,6 +98,10 @@ py -m pip install azure-storage-queue
 py -m pip install azure-data-tables
 py -m pip install azure-storage-blob
 ```
+Recreate the requirements file:
+```
+pip freeze > requirements.txt
+```
 
 
 ## 4. Startup Script
