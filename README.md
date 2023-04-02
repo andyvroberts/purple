@@ -1,7 +1,8 @@
-![Build Status](https://github.com/avroberts-azure/purple/actions/workflows/test-deploy.yml/badge.svg)
-
 # Ingest Historical Land Registry Property Prices
 Ingest the UK land registry update file of sold residential property prices.  Store them in table storage.  Create the application using Python.
+
+![Build Status](https://github.com/avroberts-azure/purple/actions/workflows/test-deploy.yml/badge.svg)  
+
 
 ## Application Design
 [Read this file for the requirements, design choices and changes throughout the implementaton process](docs/design.md)  
