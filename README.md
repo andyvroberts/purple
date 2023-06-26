@@ -19,12 +19,3 @@ Setup the dotnet and Azure SKD's before you do anything else.
 [Read this file for CLI commands to create resources and the Functions Core Tools Deploy command](docs/funcapp.md) 
 
 <br>
-
-## Montly Costs Tracker
-
-| Month | Data | Function App | Total |
-|:-------------|:--------------|:-------|:------------|
-| 2023-04 |  | | |
-| 2023-03 | (2.3gb/6m rows) £0.34 | £0.93  | £1.27 |
-
-
