@@ -52,8 +52,9 @@ def save_postcode_list(reader, data_path):
             decoder: a function that retrieves a postcode from the a record
             return: Count of records processed
     """
-    postcodes = defaultdict(int)
+    postcodes = defaultdict(set)
     count = 0
+    total = 0
 
     for file_rec in reader(data_path):
         count += 1
@@ -61,11 +62,14 @@ def save_postcode_list(reader, data_path):
 
         if len(rec['Postcode']) > 0:
             pc = rec['Postcode']
-            postcodes[pc] += 1
+            oc = rec['Postcode'].split()[0]
+            postcodes[oc].add(pc)
 
     for k, v in postcodes.items():
-        if k == 'BR7 5LN':
-            log.info(f"Postcode {k} = {v}")
+        if k == 'LS4':
+            #pc_list = [{'Postcode':x} for x in v]
+            total += len(v)
+            log.info(f"{v} = {total}")
             
     return count
 
