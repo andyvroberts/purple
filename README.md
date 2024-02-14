@@ -37,6 +37,10 @@ flowchart TD;
     Scanner --> Reader --> Loader
 ```
 
+## Environment
+[Setup a new WSL environment with Debian, Pyhon3.11, Azure CLI, Dotnet and Function Core Tools](environment.md)  
+<br>
+
 ## Python Setup
 Use the latest supported version as defined by the [Microsoft Docs](https://learn.microsoft.com/en-us/azure/azure-functions/supported-languages?tabs=isolated-process%2Cv4&pivots=programming-language-python#languages-by-runtime-version).  This is currently 3.11.  
 We will be using the [Python v2](https://learn.microsoft.com/en-us/azure/azure-functions/create-first-function-cli-python?tabs=linux%2Cbash%2Cazure-cli&pivots=python-mode-decorators) programming model (apologies for the name clash with this purple project).  
@@ -63,37 +67,10 @@ py -m pip install azure-data-tables
 py -m pip install azure-storage-queue
 ```
 
-### Install Azure Functions Core Tools v4
-Install by using the instructions [already linked](https://learn.microsoft.com/en-us/azure/azure-functions/create-first-function-cli-python?tabs=linux%2Cbash%2Cazure-cli&pivots=python-mode-decorators#install-the-azure-functions-core-tools) above.  Once installed, check you have the latest v4.  
-Currently, after following the instructions this fails on Debian 12.  
-
-As a workaround until the official Debian 12 package is released I was able to run the Debian 11 azure-functions-core-tools package on Debian 12.
-to do so - manually replace:  
-```
-https://packages.microsoft.com/debian/12/prod bookworm main
-```
-with:
-```
-https://packages.microsoft.com/debian/11/prod bullseye main
-```
-in:
-```
-/etc/apt/sources.list.d/dotnetdev.list
-```
-and then 
-```
-run sudo apt-get update
-sudo apt-get install azure-functions-core-tools-4
-func --version
-```
 ### Python Module Folders
 The there components to our application use a combination of local functions and an Azure Function App (of Python functions).  To ensure we can deploy the Azure Function App, it needs to be in a seperate folder to isolate the deployable code.    
 ```
 mkdir azure
 mkdir local
 ```
-
-
-
-
 
