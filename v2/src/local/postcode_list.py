@@ -6,6 +6,9 @@ import sys
 
 from collections import defaultdict
 from logging.handlers import RotatingFileHandler
+
+from azu import table_storage as tab
+from model import formatter as fmt
 from model.decoder import mapping_postcode as decoder
 
 log = logging.getLogger("purple.v2.src.local.postcode_list")
@@ -53,9 +56,10 @@ def save_postcode_list(reader, data_path):
             return: Count of records processed
     """
     postcodes = defaultdict(set)
-    count = 0
-    total = 0
+    count, batch, batches, total = 0, 0, 0, 0
+    table_batch = []
 
+    # read all postcodes and put into a set.
     for file_rec in reader(data_path):
         count += 1
         rec = decoder(file_rec)
@@ -65,11 +69,27 @@ def save_postcode_list(reader, data_path):
             oc = rec['Postcode'].split()[0]
             postcodes[oc].add(pc)
 
-    for k, v in postcodes.items():
-        if k == 'LS4':
-            #pc_list = [{'Postcode':x} for x in v]
+    if len(postcodes) > 0:
+        cl = tab.get_table_client("outcode")
+
+        # create batches of 100 rows of outcode mapping table entities.
+        for k, v in postcodes.items():
+            batch +=1
             total += len(v)
-            log.info(f"{v} = {total}")
+            table_batch.append(fmt.outcode_mapping(k, v))
+
+            if batch == 100:
+                tab.upsert_replace_batch(cl, table_batch)
+                table_batch = []
+                batches += 1
+                batch = 0
+
+        # insert the final entities that did not reach the batch limit
+        if len(table_batch) > 0:
+            tab.upsert_replace_batch(cl, table_batch)
+            batches += 1
+
+        log.info(f"Inserted {batches} outcode table batches.")
             
     return count
 

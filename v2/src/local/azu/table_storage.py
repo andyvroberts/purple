@@ -32,24 +32,6 @@ def get_table_client(name):
 
     return table_client
 
-# -----------------------------------------------------------------------------------#
-def table_batch(data, batch_size: int = 100):
-    """return a list of records of the required batch size until the input list is 
-    exhausted.
-
-        Args:
-            data: the list of data records to batch
-            batch_size: an integer that represents the required batch size
-            Return: a generator that returns sets of the batch size
-    """
-    try:
-        for i in range(0, len(data), batch_size):
-            yield data[i:i+batch_size]
-
-    except Exception as ex:
-        logging.error(f'Failed to create a table batch: {ex.error}')
-        raise ex
-
 # ---------------------------------------------------------------------------------------#
 def upsert_replace_batch(client, batch):
     """ utility to upsert a batch.  Do not insert duplicate RowKey values.
@@ -61,14 +43,12 @@ def upsert_replace_batch(client, batch):
     """
     ops_bat = []
 
-    for bat in table_batch(batch):
-        for rec in bat:
-            next_entry = ("upsert", rec,  {"mode": "replace"})
-            ops_bat.append(next_entry)
-
-        try:
-            client.submit_transaction(operations=ops_bat)
-            logging.info(f'STORAGE_TABLE. Batch inserted rows = {len(ops_bat)}')
-        except TableTransactionError as txne:
-            logging.error(txne.error)
-            raise txne
+    for rec in batch:
+        next_entry = ("upsert", rec,  {"mode": "replace"})
+        ops_bat.append(next_entry)
+    try:
+        client.submit_transaction(operations=ops_bat)
+        logging.info(f'STORAGE_TABLE. Batch inserted rows = {len(ops_bat)}')
+    except TableTransactionError as txne:
+        logging.error(txne.error)
+        raise txne
