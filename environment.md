@@ -1,5 +1,5 @@
 # Setup Linux Dev Environment
-WSL Debian with Python 3.11, dotnet, Azure CLI & Azure Functions core tools.
+WSL Debian with Python 3.11, dotnet 8.0, Azure CLI & Azure Functions core tools v4.
 
 ## WSL 
 From an elevated powershell prompt do one or the other:  

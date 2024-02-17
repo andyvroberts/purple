@@ -1,1 +1,0 @@
-What are the local functions.

@@ -74,3 +74,12 @@ mkdir azure
 mkdir local
 ```
 
+### Linux Environment Variables
+To connect to an Azure storage account, we will create clients (table and queue) using whichever Azure Python SDK ".from_connection_string" function is needed.  In order for this to work, a Linux environment variable must be set:  
+```
+export LandregDataStorage="connection string"
+```
+In WSL, closing the session removes the variable.
+
+
+

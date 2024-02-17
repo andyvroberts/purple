@@ -1,5 +1,6 @@
 import logging
-import os
+import sys
+from os import environ
 
 from azure.data.tables import TableClient, TableTransactionError
 from azure.core.exceptions import ResourceExistsError
@@ -21,7 +22,13 @@ def get_table_client(name):
             name: a table name.
             return: the table client for later entity inserts
     """
-    storage_conn_str = os.getenv('LandregDataStorage')
+    try:
+        environ["LandregDataStorage"]
+    except KeyError:
+        log.error(f"Environment variable LandregDataStorage does not exist.")
+        sys.exit(1)
+
+    storage_conn_str = environ.get('LandregDataStorage')
     table_client = TableClient.from_connection_string(storage_conn_str, name)
 
     try:
@@ -44,6 +51,7 @@ def upsert_replace_batch(client, batch):
     ops_bat = []
 
     for rec in batch:
+        log.info(f"Next Rec = {rec}")
         next_entry = ("upsert", rec,  {"mode": "replace"})
         ops_bat.append(next_entry)
     try:
