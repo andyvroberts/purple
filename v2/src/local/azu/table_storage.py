@@ -4,8 +4,8 @@ from os import environ
 
 from azure.data.tables import TableClient, TableTransactionError
 from azure.core.exceptions import ResourceExistsError
-# from azure.core.exceptions import HttpResponseError
-# from azure.core.exceptions import ResourceNotFoundError
+from azure.core.exceptions import HttpResponseError
+from azure.core.exceptions import ResourceNotFoundError
 
 # ---------------------------------------------------------------------------------------#
 log = logging.getLogger("purple.v2.src.local.azu.table_storage")
@@ -47,6 +47,7 @@ def upsert_replace_batch(client, batch):
         Args:   
             client: the azure table client for the configuration table
             batch: a list of table record dicts
+            return: the number of rows inserted in the batch
     """
     ops_bat = []
 
@@ -54,9 +55,41 @@ def upsert_replace_batch(client, batch):
         log.info(f"Next Rec = {rec}")
         next_entry = ("upsert", rec,  {"mode": "replace"})
         ops_bat.append(next_entry)
+
     try:
         client.submit_transaction(operations=ops_bat)
-        logging.info(f'STORAGE_TABLE. Batch inserted rows = {len(ops_bat)}')
+        return len(ops_bat)
+    
     except TableTransactionError as txne:
-        logging.error(txne.error)
+        logging.error(f"Table Transaction Error: {txne.error}")
         raise txne
+    except ResourceNotFoundError as rxne:
+        logging.error(f"Resource Not Found: {rxne.error}")
+        raise rxne
+    
+# ---------------------------------------------------------------------------------------#
+def query_ready_outcodes(client):
+    """ utility to query the outcode mapping table
+
+        Args:   
+            client: the azure table client for the configuration table
+            return: a generator of outcode to postcode mapping table records
+    """
+    parms = {
+        "pk": "OUTCODE",
+        "ready": "R"
+    }
+    query = "PartitionKey eq @pk and Status eq @ready"
+
+    try:
+        oc_list = client.query_entities(query_filter=query, parameters=parms)
+
+        for oc_entity in oc_list:
+            yield oc_entity
+
+    except ResourceNotFoundError as rxne:
+        logging.error(f"Resource Not Found: {rxne.error}")
+        raise rxne
+    except HttpResponseError as qe:
+        logging.error(f"HTTP Error: {qe.error}")
+        raise qe

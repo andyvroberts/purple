@@ -15,7 +15,7 @@ log = logging.getLogger("purple.v2.src.local.postcode_list")
 #------------------------------------------------------------------------------
 def controller():
     """
-        Orchestrate the process from the command line agrs.
+        Orchestrate the process from the command line args.
 
         Args:
             return: None
@@ -75,21 +75,20 @@ def save_postcode_list(reader, data_path):
         # create batches of 100 rows of outcode mapping table entities.
         for k, v in postcodes.items():
             batch +=1
-            total += len(v)
             table_batch.append(fmt.outcode_mapping(k, v))
 
             if batch == 100:
-                tab.upsert_replace_batch(cl, table_batch)
+                total += tab.upsert_replace_batch(cl, table_batch)
                 table_batch = []
                 batches += 1
                 batch = 0
 
         # insert the final entities that did not reach the batch limit
         if len(table_batch) > 0:
-            tab.upsert_replace_batch(cl, table_batch)
+            total += tab.upsert_replace_batch(cl, table_batch)
             batches += 1
 
-        log.info(f"Inserted {batches} outcode table batches.")
+        log.info(f"Inserted {batches} outcode table batches with {total} rows.")
             
     return count
 
