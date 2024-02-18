@@ -1,6 +1,7 @@
 import csv
 import logging
 
+
 log = logging.getLogger("purple.v2.src.local.model.decoder")
 #---------------------------------------------------------------------------------------#
 def price_record(rec):
@@ -19,13 +20,8 @@ def price_record(rec):
                 'NewBuild','Duration','Paon','Saon','Street','Locality',\
                 'Town','District','County']
 
-    decoded_rec = csv.DictReader([rec], in_cols)
-    # shallow copy the next (actually, the only one) dictreader entry into a new dict
-    in_dict = next(decoded_rec).copy()
-    # use filter() function to remove unwanted columns 
-    # (note, t[0] identifies the keys from in_dict but you could use t[1] for the values)
-    out_dict = {k : v for k,v in filter(lambda t: t[0] in out_cols, in_dict.items())}
-    return out_dict
+    return record_from_dict(rec, in_cols, out_cols)
+
 
 #---------------------------------------------------------------------------------------#
 def mapping_postcode(rec):
@@ -41,10 +37,20 @@ def mapping_postcode(rec):
     
     out_cols = ['Postcode']
 
-    decoded_rec = csv.DictReader([rec], in_cols)
-    # shallow copy the next (actually, the only one) dictreader entry into a new dict
+    return record_from_dict(rec, in_cols, out_cols)
+
+
+#---------------------------------------------------------------------------------------#
+def record_from_dict(rec, record_cols, required_cols):
+    """for mapping outcodes to postcodes requires just the postcode property.
+
+        Args:   
+            rec: a CSV string representing a data record of columns
+            Return: the dict of postcodes.
+    """
+    decoded_rec = csv.DictReader([rec], record_cols)
     in_dict = next(decoded_rec).copy()
     # use filter() function to remove unwanted columns 
     # (note, t[0] identifies the keys from in_dict but you could use t[1] for the values)
-    out_dict = {k : v for k,v in filter(lambda t: t[0] in out_cols, in_dict.items())}
+    out_dict = {k : v for k,v in filter(lambda t: t[0] in required_cols, in_dict.items())}
     return out_dict

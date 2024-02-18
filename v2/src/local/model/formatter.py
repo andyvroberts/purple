@@ -1,5 +1,6 @@
 import logging
 
+
 log = logging.getLogger("purple.v2.src.local.model.formatter")
 #---------------------------------------------------------------------------------------#
 def list_to_string(data_list):
@@ -9,13 +10,23 @@ def list_to_string(data_list):
 
     return data_string
 
+
+# ---------------------------------------------------------------------------------------#
+def string_to_list(data_string):
+    """ convert the retrieved table entity list-of-values into a python list type
+    """
+    data_array = data_string.split(',')
+
+    return list(data_array)
+
+
 #---------------------------------------------------------------------------------------#
 def outcode_mapping(outcode, postcodes):
     """ format input into an azure storage table record (entity)
 
         Args:   
             outcode: the rowkey "S052"
-            postcodes: {'SO52 9GR', 'SO52 9AW', 'SO52 9DQ'}".
+            postcodes: ['SO52 9GR', 'SO52 9AW', 'SO52 9DQ']".
             Return: a formatted record to insert into Azure Tables
     """
     new_rec = {}

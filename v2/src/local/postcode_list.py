@@ -9,7 +9,7 @@ from logging.handlers import RotatingFileHandler
 
 from azu import table_storage as tab
 from model import formatter as fmt
-from model.decoder import mapping_postcode as decoder
+from model import decoder as dcdr
 
 log = logging.getLogger("purple.v2.src.local.postcode_list")
 #------------------------------------------------------------------------------
@@ -25,7 +25,7 @@ def controller():
     latest = 'http://prod.publicdata.landregistry.gov.uk.s3-website-eu-west-1.amazonaws.com/pp-complete.csv'
     log.debug(f'executing from path {os.getcwd()}')
 
-    args = ParseCommandLine()
+    args = parse_command_line()
     if args.webfull is True:
         data_path = latest
         from ukio.http_reader import stream_file as rdr
@@ -61,7 +61,7 @@ def save_postcode_list(reader, data_path):
     # read all postcodes and put into a set.
     for file_rec in reader(data_path):
         count += 1
-        rec = decoder(file_rec)
+        rec = dcdr.mapping_postcode(file_rec)
 
         if len(rec['Postcode']) > 0:
             pc = rec['Postcode']
@@ -92,7 +92,7 @@ def save_postcode_list(reader, data_path):
     return count
 
 #---------------------------------------------------------------------------------------#
-def ParseCommandLine():
+def parse_command_line():
     """Identify flags and values passed into execution
     """
     par = argparse.ArgumentParser('UK Land Data Loader: command line parser')

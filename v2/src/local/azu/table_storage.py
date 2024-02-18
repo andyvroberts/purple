@@ -14,13 +14,14 @@ logging.getLogger("azure.core.pipeline").setLevel(logging.ERROR)
 logging.getLogger("urllib3.connectionpool").setLevel(logging.ERROR)
 logging.getLogger('azure.storage.queue').setLevel(logging.ERROR)
 
+
 # ---------------------------------------------------------------------------------------#
 def get_table_client(name):
     """ utility to get a reference to an azure storage table.  
         try to create the table in case it does not already exist.
         Args:   
             name: a table name.
-            return: the table client for later entity inserts
+            return: the table client for later row manipulation
     """
     try:
         environ["LandregDataStorage"]
@@ -38,6 +39,7 @@ def get_table_client(name):
         pass
 
     return table_client
+
 
 # ---------------------------------------------------------------------------------------#
 def upsert_replace_batch(client, batch):
@@ -67,6 +69,7 @@ def upsert_replace_batch(client, batch):
         logging.error(f"Resource Not Found: {rxne.error}")
         raise rxne
     
+
 # ---------------------------------------------------------------------------------------#
 def query_ready_outcodes(client):
     """ utility to query the outcode mapping table
