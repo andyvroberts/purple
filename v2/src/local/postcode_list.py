@@ -40,7 +40,6 @@ def controller():
     duration = end_exec - start_exec
     hours, hrem = divmod(duration, 3600)
     mins, secs = divmod(hrem, 60)
-    print(f"Finished process (hours): {hours}:{mins}:{round(secs, 2)}.")
     log.info(f"Finished process: {hours}:{mins}:{round(secs, 2)}.")
 
 #------------------------------------------------------------------------------

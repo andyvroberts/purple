@@ -20,15 +20,20 @@ def controller():
             return: None
     """
     log.info("-------------------------------------------------------------------")
+    start_exec = time.time()
+
     args = ParseCommandLine()
     cl = tab.get_table_client("outcode")
 
-    if args.outcode is None:
-        log.error(f"Missing outcode on execution")
-        sys.exit(1)
-    else:
-        pass
+    for row in tab.query_ready_outcodes(cl):
+        log.info(row)
 
+
+    end_exec = time.time()
+    duration = end_exec - start_exec
+    hours, hrem = divmod(duration, 3600)
+    mins, secs = divmod(hrem, 60)
+    log.info(f"Finished process: {hours}:{mins}:{round(secs, 2)}.")
 
 
 #---------------------------------------------------------------------------------------#
