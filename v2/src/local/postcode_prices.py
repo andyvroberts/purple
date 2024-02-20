@@ -71,23 +71,23 @@ def fetch_prices(reader, data_path, postcodes):
             reader: either an http stream reader or a local file reader function
             data_path: the full location of the file (web url or file path)
             postcodes: a list of postcodes for the price records to fetch
-            decoder: a function that retrieves a postcode from the a record
             return: Count of records processed
     """
     all_prices = defaultdict(set)
 
     # read all postcodes and put into a list.
     for file_rec in reader(data_path):
-        count += 1
         rec = dcdr.price_record(file_rec)
+        pc = rec['Postcode']
 
-        if rec['postcode'] in postcodes:
-            all_prices['postcode'].add(rec)
+        # for each postcode retrieve its price records
+        if pc in postcodes:
+            compact_rec = fmt.compact_price_rec(rec)
+            all_prices[pc].add(compact_rec)
 
-    for k, v in all_prices.items():
-        print(f"Postcode = {k}")
-        print(v)
-
+    # for k, v in all_prices.items():
+    #     log.info(f"Postcode = {k}")
+    return all_prices
 
 #---------------------------------------------------------------------------------------#
 def parse_command_line():
