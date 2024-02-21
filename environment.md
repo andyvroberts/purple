@@ -37,7 +37,7 @@ Next, install all Python build dependancies.
 ```
 sudo apt-get build-dep python3
 sudo apt-get install pkg-config
-sudo apt-get install sudo libssl-dev
+sudo apt-get install libssl-dev
 sudo apt-get install build-essential
 sudo apt-get install libffi-dev
 ```
