@@ -89,6 +89,24 @@ def fetch_prices(reader, data_path, postcodes):
     #     log.info(f"Postcode = {k}")
     return all_prices
 
+
+#---------------------------------------------------------------------------------------#
+def group_and_push(postcode_set):
+    """
+        for each set of prices belonging to a single postcode, create a queue message
+
+        Args:
+            return: a list of postcodes
+    """
+    postcodes = []
+    cl = tab.get_table_client("outcode")
+
+    for row in tab.query_ready_outcodes(cl):
+        postcodes.extend(fmt.string_to_list(row['postcodes']))
+
+    return postcodes
+
+
 #---------------------------------------------------------------------------------------#
 def parse_command_line():
     """Identify flags and values passed into execution
