@@ -6,6 +6,7 @@ import sys
 
 from collections import defaultdict
 from logging.handlers import RotatingFileHandler
+from itertools import groupby
 from azu import table_storage as tab
 from model import formatter as fmt
 from model import decoder as dcdr
@@ -35,6 +36,7 @@ def controller():
 
     args = parse_command_line()
     pc_list = fetch_prices(rdr, data_path, fetch_ready_postcodes())
+    group_and_push(pc_list)
 
     end_exec = time.time()
     duration = end_exec - start_exec
@@ -98,14 +100,11 @@ def group_and_push(postcode_set):
         Args:
             return: a list of postcodes
     """
-    postcodes = []
-    cl = tab.get_table_client("outcode")
-
-    for row in tab.query_ready_outcodes(cl):
-        postcodes.extend(fmt.string_to_list(row['postcodes']))
-
-    return postcodes
-
+    #sorted_set = sorted(postcode_set, key=lambda x: x['Postcode'])
+    sorted_set = sorted(postcode_set)
+    for k, g in groupby(postcode_set, key=lambda x: x):
+        print(k)
+        print(g)
 
 #---------------------------------------------------------------------------------------#
 def parse_command_line():
