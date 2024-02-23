@@ -8,6 +8,7 @@ from collections import defaultdict
 from logging.handlers import RotatingFileHandler
 from itertools import groupby
 from azu import table_storage as tab
+from azu import queue_storage as que
 from model import formatter as fmt
 from model import decoder as dcdr
 
@@ -36,7 +37,7 @@ def controller():
 
     args = parse_command_line()
     pc_list = fetch_prices(rdr, data_path, fetch_ready_postcodes())
-    group_and_push(pc_list)
+    sort_and_push(pc_list)
 
     end_exec = time.time()
     duration = end_exec - start_exec
@@ -55,9 +56,9 @@ def fetch_ready_postcodes():
             return: a list of postcodes
     """
     postcodes = []
-    cl = tab.get_table_client("outcode")
+    cl1 = tab.get_table_client("outcode")
 
-    for row in tab.query_ready_outcodes(cl):
+    for row in tab.query_ready_outcodes(cl1):
         postcodes.extend(fmt.string_to_list(row['postcodes']))
 
     return postcodes
@@ -75,7 +76,7 @@ def fetch_prices(reader, data_path, postcodes):
             postcodes: a list of postcodes for the price records to fetch
             return: Count of records processed
     """
-    all_prices = defaultdict(set)
+    all_prices = defaultdict(list)
 
     # read all postcodes and put into a list.
     for file_rec in reader(data_path):
@@ -85,7 +86,7 @@ def fetch_prices(reader, data_path, postcodes):
         # for each postcode retrieve its price records
         if pc in postcodes:
             compact_rec = fmt.compact_price_rec(rec)
-            all_prices[pc].add(compact_rec)
+            all_prices[pc].append(compact_rec)
 
     # for k, v in all_prices.items():
     #     log.info(f"Postcode = {k}")
@@ -93,18 +94,20 @@ def fetch_prices(reader, data_path, postcodes):
 
 
 #---------------------------------------------------------------------------------------#
-def group_and_push(postcode_set):
+def sort_and_push(postcode_set):
     """
         for each set of prices belonging to a single postcode, create a queue message
 
         Args:
             return: a list of postcodes
     """
-    #sorted_set = sorted(postcode_set, key=lambda x: x['Postcode'])
-    sorted_set = sorted(postcode_set)
-    for k, g in groupby(postcode_set, key=lambda x: x):
-        print(k)
-        print(g)
+    s = 0
+    cl2 = que.get_base64_queue_client("prices")
+
+    for entry in sorted(postcode_set.items(), key=lambda x:x):
+        s+=30
+        que.send_price_message(cl2, entry, s)
+
 
 #---------------------------------------------------------------------------------------#
 def parse_command_line():
