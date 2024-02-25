@@ -79,7 +79,7 @@ To connect to an Azure storage account, we will create clients (table and queue)
 ```
 export LandregDataStorage="connection string"
 ```
-In WSL, closing the session removes the variable.
+In WSL/ChromeOS, closing the session removes the variable.
 
 
 
