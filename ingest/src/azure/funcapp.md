@@ -16,6 +16,12 @@ https://learn.microsoft.com/en-us/azure/azure-functions/functions-reference-pyth
 
 Avoid using the CLI scaffolding as it does not yet seem to create accurate and well structured content as described by the V2 model.  
 
+**3**  
+Create a Github Action to deploy the Azure Function App components.   
+https://learn.microsoft.com/en-us/azure/azure-functions/functions-how-to-github-actions?tabs=linux%2Cpython&pivots=method-manual  
+
+You will have to create an empty Function App in an Azure Subscription prior to a deploy, as this method assumes the Function App already exists.  
+
 
 
 
