@@ -54,7 +54,6 @@ def upsert_replace_batch(client, batch):
     ops_bat = []
 
     for rec in batch:
-        log.info(f"Next Rec = {rec}")
         next_entry = ("upsert", rec,  {"mode": "replace"})
         ops_bat.append(next_entry)
 
