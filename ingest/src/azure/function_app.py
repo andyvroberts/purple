@@ -22,6 +22,7 @@ def prices_create(azqueue: func.QueueMessage):
         an azure table.
 
         Args:
+            azqueue: the incoming Azure Queue Message
             return: None
     """
     # accept the message.
