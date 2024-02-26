@@ -4,7 +4,7 @@ name: Deploy Python project to Azure Function App
 on:
   push:
     branches:
-    - release
+    - main
     paths:
     - 'purple/ingest/src/azure/**'
 
