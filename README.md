@@ -4,7 +4,21 @@ Create sets of UK Property Prices, grouped by Postcode, to be queried by a sampl
   
 [![Ingest Queue Trigger Function App](https://github.com/andyvroberts/purple/actions/workflows/purple-fa.deploy.yml/badge.svg)](https://github.com/andyvroberts/purple/actions/workflows/purple-fa.deploy.yml)  
 
-## Azure
+
+## Project Structure  
+The project has 3 components.  The Ingest folder is for data acquisition and populating price records at the postcode grouping.  The Server folder is for a data API that allows clients to retrieve price data based on a postcode lookup.  The Present folder contains a simple Web App which is the UX.  
+```bash
+├── ingest
+│   ├── azure
+│   └── local
+├── serve
+└── present
+---
+
+The ingest folder has 2 sub-folders. The 'local' one contains python code that runs locally.  The 'azure' one contains a Python function app.  
+
+
+### 1. Ingest
 There are three components:  
 1. Create the Postode list as configuration
     - Run a Python function locally to Create a unique list of postcodes in the PPD file
@@ -18,8 +32,6 @@ There are three components:
     - Create an Azure Function to read Queue messages and insert the prices into the Table
 
 <br>
-
-
 
 ```mermaid
 %%{init: {'theme':'dark'}}%%
@@ -39,49 +51,6 @@ flowchart TD;
     Scanner --> Reader --> Loader
 ```
 
-## Environment
-[Setup a new WSL environment with Debian, Pyhon3.11, Azure CLI, Dotnet and Function Core Tools](environment.md)  
-<br>
-
-## Python Setup
-Use the latest supported version as defined by the [Microsoft Docs](https://learn.microsoft.com/en-us/azure/azure-functions/supported-languages?tabs=isolated-process%2Cv4&pivots=programming-language-python#languages-by-runtime-version).  This is currently 3.11.  
-We will be using the [Python v2](https://learn.microsoft.com/en-us/azure/azure-functions/create-first-function-cli-python?tabs=linux%2Cbash%2Cazure-cli&pivots=python-mode-decorators) programming model (apologies for the name clash with this purple project).  
-
-We wil NOT be using the VS Code Azure Functions extension as we will be using the Azure CLI from WSL, and we wil NOT be using the Azurite node based Azure storage emulator.  
-
-### Setup pip and venv.
-```python
-sudo apt-get install python3-venv
-sudo apt install python3-pip
-```
-
-### Setup a Virtual Environment.  
-From within the *src* code directory, add the **.venv** folder and activate a new virtual environment called 'v2'.  This gives us a clean python starting point.   
-```python
-cd src
-mkdir .venv
-python3 -m venv .venv/v2
-source .venv/v2/bin/activate
-```
-Add the required Azure SDK libs.
-```
-py -m pip install azure-data-tables
-py -m pip install azure-storage-queue
-```
-
-### Python Module Folders
-The there components to our application use a combination of local functions and an Azure Function App (of Python functions).  To ensure we can deploy the Azure Function App, it needs to be in a seperate folder to isolate the deployable code.    
-```
-mkdir azure
-mkdir local
-```
-
-### Linux Environment Variables
-To connect to an Azure storage account, we will create clients (table and queue) using whichever Azure Python SDK ".from_connection_string" function is needed.  In order for this to work, a Linux environment variable must be set:  
-```
-export LandregDataStorage="connection string"
-```
-In WSL/ChromeOS, closing the session removes the variable.
 
 
 

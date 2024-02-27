@@ -105,7 +105,7 @@ def sort_and_push(postcode_set):
     cl2 = que.get_base64_queue_client("prices")
 
     for entry in sorted(postcode_set.items(), key=lambda x:x):
-        s+=30
+        s+=600
         que.send_price_message(cl2, entry, s)
 
 
