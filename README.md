@@ -13,7 +13,7 @@ The project has 3 components.  The Ingest folder is for data acquisition and pop
 │   └── local
 ├── serve
 └── present
----
+```
 
 The ingest folder has 2 sub-folders. The 'local' one contains python code that runs locally.  The 'azure' one contains a Python function app.  
 
