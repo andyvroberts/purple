@@ -12,7 +12,6 @@ log = logging.getLogger("purple.v2.src.local.azu.table_storage")
 # suppress or show messages from Azure loggers.
 logging.getLogger("azure.core.pipeline").setLevel(logging.ERROR)
 logging.getLogger("urllib3.connectionpool").setLevel(logging.ERROR)
-logging.getLogger('azure.storage.queue').setLevel(logging.ERROR)
 
 
 # ---------------------------------------------------------------------------------------#
@@ -95,3 +94,18 @@ def query_ready_outcodes(client):
     except HttpResponseError as qe:
         logging.error(f"HTTP Error: {qe.error}")
         raise qe
+
+
+#---------------------------------------------------------------------------------------# 
+def update(client, table_record):
+    """ utility to update an existing table record
+        Args:   
+            client: the azure table client for the storage table
+            table_record: a table record dict, including partition/row keys
+    """
+    try:
+        client.update_entity(table_record)
+    except HttpResponseError as he:
+        logging.error(he)
+        raise he
+

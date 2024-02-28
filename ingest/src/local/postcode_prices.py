@@ -35,9 +35,15 @@ def controller():
         data_path = args.localfile
         from ukio.file_reader import stream_file as rdr
 
-    args = parse_command_line()
-    pc_list = fetch_prices(rdr, data_path, fetch_ready_postcodes())
-    sort_and_push(pc_list)
+    tab_client = tab.get_table_client("outcode")
+    queue_client = que.get_base64_queue_client("prices")
+
+    outcodes, postcodes = fetch_ready_postcodes(tab_client)
+    pc_list = fetch_prices(rdr, data_path, postcodes)
+    sort_and_push(queue_client, pc_list)
+    done = deactivate_outcodes(tab_client, outcodes)
+
+    log.info(f"Completed {done} Outcodes.")
 
     end_exec = time.time()
     duration = end_exec - start_exec
@@ -47,21 +53,23 @@ def controller():
 
 
 #---------------------------------------------------------------------------------------#
-def fetch_ready_postcodes():
+def fetch_ready_postcodes(cl1):
     """
         Read ready configuration rows to find the list of all Postcodes that will be used
         to look-up prices.
 
         Args:
-            return: a list of postcodes
+            cl1: the azure table storage client for the 'outcode' table
+            return: a tuple of distinct lists of outcodes and postcodes
     """
     postcodes = []
-    cl1 = tab.get_table_client("outcode")
+    outcodes = []
 
     for row in tab.query_ready_outcodes(cl1):
+        outcodes.append(row['RowKey'])
         postcodes.extend(fmt.string_to_list(row['postcodes']))
 
-    return postcodes
+    return outcodes, postcodes
 
 
 #---------------------------------------------------------------------------------------#
@@ -77,6 +85,7 @@ def fetch_prices(reader, data_path, postcodes):
             return: Count of records processed
     """
     all_prices = defaultdict(list)
+    price_ix = 0
 
     # read all postcodes and put into a list.
     for file_rec in reader(data_path):
@@ -87,14 +96,16 @@ def fetch_prices(reader, data_path, postcodes):
         if pc in postcodes:
             compact_rec = fmt.compact_price_rec(rec)
             all_prices[pc].append(compact_rec)
+            price_ix += 1
 
-    # for k, v in all_prices.items():
-    #     log.info(f"Postcode = {k}")
+    #for k, v in all_prices.items():
+    #    log.info(f"Postcode = {k} has {len(v)} prices.")
+    log.debug(f"Retrieved {price_ix} prices")
     return all_prices
 
 
 #---------------------------------------------------------------------------------------#
-def sort_and_push(postcode_set):
+def sort_and_push(cl2, postcode_set):
     """
         for each set of prices belonging to a single postcode, create a queue message
 
@@ -102,12 +113,34 @@ def sort_and_push(postcode_set):
             return: a list of postcodes
     """
     s = 0
-    cl2 = que.get_base64_queue_client("prices")
 
     for entry in sorted(postcode_set.items(), key=lambda x:x):
-        s+=600
         que.send_price_message(cl2, entry, s)
+        s+=300
 
+
+#---------------------------------------------------------------------------------------#
+def deactivate_outcodes(cl1, outcode_list):
+    """
+        Read ready configuration rows to find the list of all Postcodes that will be used
+        to look-up prices.
+
+        Args:
+            cl1: the azure table storage client for the 'outcode' table
+            postcodes: a list of outcodes and postcodes to deactivate
+            return: Count of postcodes processed
+    """
+    updated_count = 0
+
+    for oc in outcode_list:
+        rec = {}
+        rec['PartitionKey'] = 'OUTCODE'
+        rec['RowKey'] = oc 
+        rec['Status'] = 'D'
+        tab.update(cl1, rec)
+        updated_count += 1
+
+    return updated_count
 
 #---------------------------------------------------------------------------------------#
 def parse_command_line():
@@ -127,8 +160,7 @@ if __name__ == '__main__' :
         format="%(asctime)s %(levelname)-8s [%(name)s]: %(message)s",
         datefmt='%Y-%m-%d %I:%M:%S',
         handlers = [
-            logging.StreamHandler(sys.stdout), 
-            RotatingFileHandler('postcode_prices.log', maxBytes=5242880, backupCount=10)
+            logging.StreamHandler(sys.stdout)
         ]
     )
 

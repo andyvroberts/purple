@@ -9,6 +9,8 @@ log = logging.getLogger("purple.v2.src.local.azu.queue_storage")
 # suppress or show messages from Azure loggers.
 logging.getLogger("azure.core.pipeline").setLevel(logging.ERROR)
 logging.getLogger("urllib3.connectionpool").setLevel(logging.ERROR)
+logging.getLogger('azure.storage.queue').setLevel(logging.ERROR)
+
 
 #---------------------------------------------------------------------------------------# 
 def get_base64_queue_client(name):
@@ -46,13 +48,18 @@ def send_price_message(client, payload, vistime: int=0):
             return: None
     """
     string_payload = str(payload)
-    msg_object = client.send_message(string_payload, visibility_timeout=vistime)
+    try:
+        msg_object = client.send_message(string_payload, visibility_timeout=vistime)
     
-    content_size = len(msg_object.content)
-    if round(content_size/1024,2) > 40:
-        log.warn(f"Message size GT 40k {round(content_size/1024,2)}")
-    elif round(content_size/1024,2) > 48:
-        log.error(f"Message size GT 48k {round(content_size/1024,2)}. Max Q payload size exceeded.")
+        content_size = len(msg_object.content)
+        if round(content_size/1024,2) > 40:
+            log.warn(f"Message size GT 40k {round(content_size/1024,2)}")
+        elif round(content_size/1024,2) > 48:
+            log.error(f"Message size GT 48k {round(content_size/1024,2)}. Max Q payload size exceeded.")
+    
+    except Exception as qe:
+        log.error(qe)
+        raise qe
 
 #---------------------------------------------------------------------------------------# 
 def delete_message(client, id, pop_receipt):
