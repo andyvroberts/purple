@@ -64,9 +64,9 @@ def format_address(paon, saon, street):
     """
     address_seq = []
     if paon:
-        address_seq.append(paon)
-    if saon:
         address_seq.append(saon)
+    if saon:
+        address_seq.append(paon)
     if street:
         address_seq.append(street)
 
