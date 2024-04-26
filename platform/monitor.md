@@ -23,11 +23,33 @@ Examples of using this in Python can be found here:  https://github.com/Azure/az
 To create an application insights component, the Bicep template can be found here:  
 https://learn.microsoft.com/en-us/azure/templates/microsoft.insights/components?pivots=deployment-language-bicep  
 
+## Function App 
+See the [Github Function App Templates](https://github.com/Azure/azure-quickstart-templates/tree/master/quickstarts/microsoft.web) for linux and python bicep quickstart templates.  
+
 ## Function App Logging
 Now the default is to use open telemetry logging in code, you can disable the automatic agent based monitoring on old function apps and switch to the new method.  
 
 To ensure the agent is disabled from an existing app, remove the APPINSIGHTS_INSTRUMENTATIONKEY from the function app environment variables and replace it with the APPLICATIONINSIGHTS_CONNECTION_STRING that should contain the *Connection String* value found in the *Properties* of a new App Insights component.
 
+
+
+
+
+// Specify kind: as 'linux' otherwise it defaults to windows.
+@description('Create the App Service Plan for the Server Farm. sku Y1 is the free tier.')
+resource hostingPlan 'Microsoft.Web/serverfarms@2022-03-01' = {
+  name: hostPlanName
+  location: azLocation
+  sku: {
+    name: 'Y1'
+    tier: 'Dynamic'
+  }
+  kind: 'linux'               // needed for linux
+  properties: {
+    reserved: true            // needed for linux
+  }
+  tags: azTags
+}
 
 
 

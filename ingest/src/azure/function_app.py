@@ -1,9 +1,10 @@
 import azure.functions as func
 import azure.data.tables as tab
 from azure.core.exceptions import ResourceExistsError, HttpResponseError
+from azure.monitor.opentelemetry import configure_azure_monitor
+from logging import INFO, getLogger
 import ast
 import os
-import logging
 
 #------------------------------------------------------------------------------
 app = func.FunctionApp()
@@ -25,6 +26,11 @@ def prices_create(azqueue: func.QueueMessage):
             azqueue: the incoming Azure Queue Message
             return: None
     """
+    # setup logging
+    configure_azure_monitor(logger_name = "prices_create")
+    log = getLogger("prices_create")
+    log.setLevel(INFO)
+
     # accept the message.
     msg_str = azqueue.get_body().decode('utf-8')
 
@@ -41,7 +47,7 @@ def prices_create(azqueue: func.QueueMessage):
     cl = tab.TableClient.from_connection_string(conn, 'postcode')
     try:
         cl.create_table()
-        logging.info(f'PRICES_CREATE: created table postcode.')
+        log.info(f'PRICES_CREATE: created table postcode.')
     except ResourceExistsError:
         pass
     
@@ -53,7 +59,7 @@ def prices_create(azqueue: func.QueueMessage):
     try:
         cl.upsert_entity(entity)
     except HttpResponseError as uE:
-        logging.error(uE.message)
+        log.error(uE.message)
         raise uE  
     
-    logging.info(f"PRICES_CREATE: Inserted Postcode {postcode}")
+    log.info(f"PRICES_CREATE: Inserted Postcode {postcode}")

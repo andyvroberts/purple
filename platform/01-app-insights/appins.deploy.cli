@@ -1,2 +1,2 @@
 paramFile=appins.params.json
-az deployment group create --resource-group Purple001 --template-file bicep/appins.bicep --parameters $paramFile
+az deployment group create --resource-group Purple001 --template-file appins.bicep --parameters $paramFile
