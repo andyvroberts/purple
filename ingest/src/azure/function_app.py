@@ -26,7 +26,7 @@ def prices_create(azqueue: func.QueueMessage):
             azqueue: the incoming Azure Queue Message
             return: None
     """
-    # setup logging
+    # setup logging using open telemetry library.
     configure_azure_monitor(logger_name = "prices_create")
     log = getLogger("prices_create")
     log.setLevel(INFO)
