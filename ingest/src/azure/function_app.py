@@ -10,6 +10,9 @@ import os
 app = func.FunctionApp()
 
 #------------------------------------------------------------------------------
+"""
+    Define the Storage Queue details of this trigger function
+"""
 @app.queue_trigger(
     arg_name="azqueue", 
     queue_name="prices",
