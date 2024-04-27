@@ -28,7 +28,20 @@ jobs:
     environment: dev
     steps:
     - name: 'Checkout GitHub Action'
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
+      with:
+        ref: main
+        sparse-checkout: ${{ env.PURPLE_PACKAGE_PATH }}
+        sparse-checkout-cone-mode: false
+
+    - name: 'Display directory content'
+      shell: bash
+      run: |
+        pwd
+        ls -l
+        cd ${{ env.PURPLE_PACKAGE_PATH }}
+        pwd
+        ls -l
 
     - name: Setup Python ${{ env.PYTHON_VERSION }} Environment
       uses: actions/setup-python@v4

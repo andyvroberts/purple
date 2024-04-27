@@ -12,6 +12,7 @@ app = func.FunctionApp()
 #------------------------------------------------------------------------------
 """
     Define the Storage Queue details of this trigger function
+    mod file to force action
 """
 @app.queue_trigger(
     arg_name="azqueue", 
