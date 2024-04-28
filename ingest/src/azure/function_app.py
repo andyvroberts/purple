@@ -12,7 +12,7 @@ app = func.FunctionApp()
 #------------------------------------------------------------------------------
 """
     Define the Storage Queue details of this trigger function
-    
+    Force git integration
 """
 @app.queue_trigger(
     arg_name="azqueue", 

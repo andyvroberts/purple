@@ -1,6 +1,6 @@
 name: Deploy Python project to Azure Function App
 
-# only run for function app code changes (not docs, test or settings)
+# only run for ingest function app code changes 
 on:
   push:
     branches:
@@ -18,7 +18,7 @@ on:
 #
 # 2. Change these variables for your configuration:
 env:
-  PURPLE_FUNCTIONAPP_NAME: 'PurpleFunc001' # set this to your function app name on Azure
+  PURPLE_FUNCTIONAPP_NAME: 'PurpleTestFunc' # set this to your function app name on Azure
   PURPLE_PACKAGE_PATH: 'ingest/src/azure/' # set this to the path to your function app project, defaults to the repository root
   PYTHON_VERSION: '3.11'                   # set this to the python version to use (e.g. '3.6', '3.7', '3.8')
 
