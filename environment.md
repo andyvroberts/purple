@@ -155,3 +155,26 @@ export LandregDataStorage="connection string"
 ```
 
 In WSL/ChromeOS, closing the session removes the variable.
+
+
+### C# Setup
+To develop C# Functions locally using the Functions Core Tools, see this doc page:  https://learn.microsoft.com/en-gb/azure/azure-functions/functions-run-local?tabs=linux%2Cisolated-process%2Cnode-v4%2Cpython-v2%2Chttp-trigger%2Ccontainer-apps&pivots=programming-language-csharp  
+
+Create the project scaffold.  At this time, dotnet-isolated is .net 8.0    
+```
+func init MyProjFolder --worker-runtime dotnet-isolated
+```
+
+For creating a Queue Trigger function, read this doc page:  https://learn.microsoft.com/en-gb/azure/azure-functions/functions-bindings-storage-queue-trigger?tabs=python-v2%2Cisolated-process%2Cnodejs-v4%2Cextensionv5&pivots=programming-language-csharp  
+
+To see all the possible templates for functions across all languages (runtimes) use the list command
+```
+func template list
+```
+
+To create a storage queue trigger, navigate into our project folder and then add the function.
+```
+cd PurpleIngest
+func new --template "QueueTrigger" --name PostcodePrices
+```
+
