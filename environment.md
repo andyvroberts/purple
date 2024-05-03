@@ -75,6 +75,7 @@ sudo apt-get update
 sudo apt-get install -y dotnet-sdk-8.0
 ```
 
+
 ## Azure CLI
 As always, read the docs first.  
 https://learn.microsoft.com/en-us/cli/azure/install-azure-cli-linux?pivots=apt
@@ -160,7 +161,7 @@ In WSL/ChromeOS, closing the session removes the variable.
 ### C# Setup
 To develop C# Functions locally using the Functions Core Tools, see this doc page:  https://learn.microsoft.com/en-gb/azure/azure-functions/functions-run-local?tabs=linux%2Cisolated-process%2Cnode-v4%2Cpython-v2%2Chttp-trigger%2Ccontainer-apps&pivots=programming-language-csharp  
 
-Create the project scaffold.  At this time, dotnet-isolated is .net 8.0    
+Create the project scaffold.  [At this time](https://dotnet.microsoft.com/en-us/platform/support/policy/dotnet-core#lifecycle), dotnet-isolated is .net 8.0    
 ```
 func init MyProjFolder --worker-runtime dotnet-isolated
 ```
@@ -169,12 +170,18 @@ For creating a Queue Trigger function, read this doc page:  https://learn.micros
 
 To see all the possible templates for functions across all languages (runtimes) use the list command
 ```
-func template list
+func templates list
 ```
 
 To create a storage queue trigger, navigate into our project folder and then add the function.
 ```
 cd PurpleIngest
 func new --template "QueueTrigger" --name PostcodePrices
+```
+
+The queue trigger template will add the nuget packages for you, however you will need to add other packages yourself.  For example this installs the latest and correct table storage namespace in your project:  
+```
+
+dotnet add package Microsoft.Azure.Functions.Worker.Extensions.Tables --version 1.3.0
 ```
 

@@ -2,6 +2,7 @@ using System;
 using Azure.Storage.Queues.Models;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Extensions.Logging;
+using Azure.Data.Tables;
 
 namespace PurpleIngest
 {
@@ -15,7 +16,9 @@ namespace PurpleIngest
         }
 
         [Function(nameof(PostcodePrices))]
-        public void Run([QueueTrigger("myqueue-items", Connection = "")] QueueMessage message)
+        public void Run(
+            [QueueTrigger("prices")] QueueMessage message,
+            [TableOutput("prices")] ITableEntity filesTab)
         {
             _logger.LogInformation($"C# Queue trigger function processed: {message.MessageText}");
         }
