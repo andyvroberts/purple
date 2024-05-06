@@ -9,10 +9,16 @@ Create sets of UK Property Prices, grouped by Postcode, to be queried by a sampl
 The project has 3 components.  The Ingest folder is for data acquisition and populating price records at the postcode grouping.  The Server folder is for a data API that allows clients to retrieve price data based on a postcode lookup.  The Present folder contains a simple Web App which is the UX.  
 ```bash
 ├── ingest
-│   ├── azure
-│   └── local
-├── serve
-└── present
+│   ├── file_scanner-py
+│   │   └── src (local price file scan using python cli)
+│   ├── queue-trigger-cs
+│   │   └── src (function app)
+│   └── queue-trigger-py
+│       └── src (function app)
+├── platform
+│   └── az (bicep and azure cli files)
+├── present
+└── serve
 ```
 
 The ingest folder has 2 sub-folders. The 'local' one contains python code that runs locally.  The 'azure' one contains a Python function app.  

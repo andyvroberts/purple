@@ -1,0 +1,36 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.5.002.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ingest", "ingest", "{FA99EFE8-813B-42D2-B07D-B28908CE200F}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "queue-trigger-cs", "queue-trigger-cs", "{9D4C426A-C515-4DD7-966D-1C371094AF9F}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{F70035BB-BBAB-412F-A12E-DD3B820C99E5}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PurpleIngest", "ingest\queue-trigger-cs\src\PurpleIngest\PurpleIngest.csproj", "{32A36CBB-1975-4574-82E7-DCAA77AC6284}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{32A36CBB-1975-4574-82E7-DCAA77AC6284}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{32A36CBB-1975-4574-82E7-DCAA77AC6284}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{32A36CBB-1975-4574-82E7-DCAA77AC6284}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{32A36CBB-1975-4574-82E7-DCAA77AC6284}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{9D4C426A-C515-4DD7-966D-1C371094AF9F} = {FA99EFE8-813B-42D2-B07D-B28908CE200F}
+		{F70035BB-BBAB-412F-A12E-DD3B820C99E5} = {9D4C426A-C515-4DD7-966D-1C371094AF9F}
+		{32A36CBB-1975-4574-82E7-DCAA77AC6284} = {F70035BB-BBAB-412F-A12E-DD3B820C99E5}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {931C5A18-D6D4-428B-B744-E62F97851718}
+	EndGlobalSection
+EndGlobal
