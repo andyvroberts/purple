@@ -1,8 +1,4 @@
 ## Python Setup
-Use the latest supported version as defined by the [Microsoft Docs](https://learn.microsoft.com/en-us/azure/azure-functions/supported-languages?tabs=isolated-process%2Cv4&pivots=programming-language-python#languages-by-runtime-version).  This is currently 3.11.  
-We will be using the [Python v2](https://learn.microsoft.com/en-us/azure/azure-functions/create-first-function-cli-python?tabs=linux%2Cbash%2Cazure-cli&pivots=python-mode-decorators) programming model (apologies for the name clash with this purple project).  
-
-We wil NOT be using the VS Code Azure Functions extension as we will be using the Azure CLI from WSL, and we wil NOT be using the Azurite node based Azure storage emulator.  
 
 ### Setup pip and venv.
 ```python

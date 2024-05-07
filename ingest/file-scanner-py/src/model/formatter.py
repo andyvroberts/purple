@@ -71,4 +71,15 @@ def format_address(paon, saon, street):
         address_seq.append(street)
 
     address_string = ' '.join(address_seq)
-    return address_string
+    return address_string.strip()
+
+# ---------------------------------------------------------------------------------------#
+def price_list_to_queue_string(postcode, price_list):
+    """convert the dict into a long string to be passed as a queue message
+        Args:   
+            postcode: The dict key
+            price_list: one or more compact price records in a list
+            Return: the queue message string
+    """
+    price_string = ('#'.join(str(x) for x in price_list))
+    return f"{postcode}~{price_string}"

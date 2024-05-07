@@ -95,27 +95,33 @@ az account show
 ```
 
 ## Azure Functions Core Tools v4
-Install by using the instructions [already linked](https://learn.microsoft.com/en-us/azure/azure-functions/create-first-function-cli-python?tabs=linux%2Cbash%2Cazure-cli&pivots=python-mode-decorators#install-the-azure-functions-core-tools) above.  Once installed, check you have the latest v4.  
-Currently, after following the instructions this fails on Debian 12.  
+Install by using [these instructions](https://github.com/Azure/azure-functions-core-tools) above.  Once installed, check you have the latest v4.   
 
-As a workaround until the official Debian 12 package is released I was able to run the Debian 11 azure-functions-core-tools package on Debian 12.
-to do so - manually replace:  
+For Debian on WSL or Chromeos:
 ```
-https://packages.microsoft.com/debian/12/prod bookworm main
-```
-with:
-```
-https://packages.microsoft.com/debian/11/prod bullseye main
-```
-in:
-```
-/etc/apt/sources.list.d/dotnetdev.list
-```
-and then 
-```
-run sudo apt-get update
-sudo apt-get install azure-functions-core-tools-4
-func --version
+export DEBIAN_VERSION=12
+
+sudo apt-get update 
+sudo apt-get install gpg 
+sudo apt-get install wget
+
+sudo wget -qO- https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > microsoft-prod.gpg
+sudo chown root:root microsoft-prod.gpg
+sudo mv microsoft-prod.gpg /usr/share/keyrings/microsoft-prod.gpg
+
+wget -q https://packages.microsoft.com/config/debian/$DEBIAN_VERSION/prod.list
+
+sudo mv prod.list /etc/apt/sources.list.d/microsoft-prod.list
+
+sudo chown root:root /usr/share/keyrings/microsoft-prod.gpg
+
+sudo chown root:root /etc/apt/sources.list.d/microsoft-prod.list
+
+sudo apt-get update 
+sudo apt-get install azure-functions-core-tools-4  -y
+
+sudo apt-get update 
+sudo apt-get install libicu-dev  -y
 ```
 
 

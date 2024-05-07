@@ -41,9 +41,9 @@ def controller():
     outcodes, postcodes = fetch_ready_postcodes(tab_client)
     pc_list = fetch_prices(rdr, data_path, postcodes)
     sort_and_push(queue_client, pc_list)
-    done = deactivate_outcodes(tab_client, outcodes)
+    #done = deactivate_outcodes(tab_client, outcodes)
 
-    log.info(f"Completed {done} Outcodes.")
+    #log.info(f"Completed {done} Outcodes.")
 
     end_exec = time.time()
     duration = end_exec - start_exec
@@ -99,7 +99,10 @@ def fetch_prices(reader, data_path, postcodes):
             price_ix += 1
 
     #for k, v in all_prices.items():
-    #    log.info(f"Postcode = {k} has {len(v)} prices.")
+        #log.info(fmt.price_list_to_queue_string(k, v))
+        #log.info(f"Postcode = {k} has {len(v)} prices.")
+        #if k ==  "B2 5UG":
+        #    log.info(f"{k} = {v}")
     log.debug(f"Retrieved {price_ix} prices")
     return all_prices
 
@@ -114,9 +117,14 @@ def sort_and_push(cl2, postcode_set):
     """
     s = 0
 
-    for entry in sorted(postcode_set.items(), key=lambda x:x):
+    for k, v in postcode_set.items():
+        entry = fmt.price_list_to_queue_string(k, v)
         que.send_price_message(cl2, entry, s)
         s+=300
+
+    #for entry in sorted(postcode_set.items(), key=lambda x:x):
+    #    que.send_price_message(cl2, entry, s)
+    #    s+=300
 
 
 #---------------------------------------------------------------------------------------#
