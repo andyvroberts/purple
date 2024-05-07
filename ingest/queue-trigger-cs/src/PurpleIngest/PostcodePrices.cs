@@ -1,8 +1,3 @@
-using System;
-using System.Text.Json;
-using System.Text.Json.Nodes;
-using System.Text.Json.Serialization;
-using Azure.Data.Tables;
 using Azure.Storage.Queues.Models;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Extensions.Logging;
@@ -13,29 +8,31 @@ namespace PurpleIngest
     {
         [Function(nameof(PostcodePrices))]
         [TableOutput("prices")]
-        public static void Run(
+        public static PriceData Run(
             [QueueTrigger("prices")] QueueMessage msg,
             FunctionContext context)
         {
             var _logger = context.GetLogger(nameof(PostcodePrices));
-            //_logger.LogInformation($"C# Queue trigger function processed: {msg.MessageText}");
+            var tabRow = new PriceData();
 
             if (msg.MessageText != null)
             {
-                var _text = msg.MessageText;
-                _text = _text.Replace('(','{').Replace(')','}');
+                var msgParts = msg.MessageText.Split('~');
+                var postcode = msgParts[0];
+                var addressString = msgParts[1];
 
-                //var _data = JsonSerializer.Deserialize<Prices>(_text);
-                _logger.LogInformation($"Converted: {_text}");
+                _logger.LogInformation($"Postcode: {postcode}");
+
+                tabRow.PartitionKey = postcode.Split(' ')[0];
+                tabRow.RowKey = postcode;
+                tabRow.Addresses = addressString;
             }
-
-
-            // return new PriceData()
-            // {
-            //     PartitionKey = "ANDY",
-            //     RowKey = _data.Postcode,
-            //     Addresses = msg.MessageText
-            // };
+            else
+            {
+                _logger.LogError($"Queue Message Body is empty.");
+            }
+            
+            return tabRow;
         }
     }
 }
