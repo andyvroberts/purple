@@ -1,0 +1,27 @@
+{
+    "$schema": "http://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "azLocation": {
+            "value": "uksouth"
+        },
+        "projShortName": {
+            "value": "Purple"
+        },
+        "projVersion": {
+            "value": "001"
+        },
+        "storageName": {
+            "value": "purpledata001"
+        },    
+        "azTags": {
+            "value": {
+                "App": "Purple",
+                "Business": "TMRSM",
+                "CreatedBy": "Andy Roberts",
+                "Service": "LandReg Property Prices",
+                "Region": "UK"
+            }
+        }
+    }
+}

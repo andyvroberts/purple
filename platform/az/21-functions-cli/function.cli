@@ -1,1 +1,1 @@
-func azure functionapp publish PurpleFunc001 --python
+func azure functionapp publish PurpleQTrggrFunc001
