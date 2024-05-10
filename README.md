@@ -1,8 +1,8 @@
 # Purple-V2: Create a Query Endpoint for Accessing UK Property Prices by Postcode
 Requirement:  
 Create sets of UK Property Prices, grouped by Postcode, to be queried by a sample web application.  
-  
-[![Ingest Queue Trigger Function App](https://github.com/andyvroberts/purple/actions/workflows/purple-fa.deploy.yml/badge.svg)](https://github.com/andyvroberts/purple/actions/workflows/purple-fa.deploy.yml)  
+
+[![Deploy Queue Trigger Azure Function App](https://github.com/andyvroberts/purple/actions/workflows/funcapp.qt.cs.deploy.yml/badge.svg)](https://github.com/andyvroberts/purple/actions/workflows/funcapp.qt.cs.deploy.yml)
 
 
 ## Project Structure  

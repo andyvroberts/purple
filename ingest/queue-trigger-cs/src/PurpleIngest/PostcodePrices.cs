@@ -21,6 +21,8 @@ namespace PurpleIngest
 
             if (msg.MessageText != null)
             {
+                decimal msgLen = msg.MessageText.Length;
+                var lenKb = Math.Round(msgLen, 2, MidpointRounding.ToEven);
                 var msgParts = msg.MessageText.Split('~');
                 var postcode = msgParts[0];
                 var addressString = msgParts[1];
@@ -28,11 +30,12 @@ namespace PurpleIngest
                 tabRow.PartitionKey = postcode.Split(' ')[0];
                 tabRow.RowKey = postcode;
                 tabRow.Addresses = addressString;
+                _logger.LogInformation($"Message payload.is {lenKb} Kb.");
 
                 var tabClient = GetTableClient("prices"); 
                 tabClient.UpsertEntity(tabRow);
 
-                _logger.LogInformation($"Postcode {postcode}: table entity updated or inserted.");
+                _logger.LogInformation($"Postcode {postcode}: prices added.");
             }
             else
             {
