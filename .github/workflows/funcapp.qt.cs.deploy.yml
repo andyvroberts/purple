@@ -1,0 +1,66 @@
+name: Deploy dotnet-isolated project to Azure Function App
+
+# only run for ingest function app code changes 
+on:
+  push:
+    branches:
+    - main
+    paths:
+    - 'ingest/queue-trigger-cs/src/PurpleIngest/**'
+
+# CONFIGURATION
+# Create the empty Azure Function App FIRST 
+#
+# For help, go to https://github.com/Azure/Actions
+#
+# 1. Set up the following secrets in your repository:
+#   AZURE_FUNCTIONAPP_PUBLISH_PROFILE
+#
+# 2. Change these variables for your configuration:
+env:
+  PURPLE_FUNCTIONAPP_NAME: 'PurpleQTrggrFunc001' 
+  PURPLE_PACKAGE_PATH: 'ingest/queue-trigger-cs/src/PurpleIngest/' 
+  DOTNET_VERSION: '8.0.x' 
+
+jobs:
+  build-and-deploy:
+    runs-on: windows-latest
+    environment: dev
+    steps:
+    - name: 'Checkout GitHub Action'
+      uses: actions/checkout@v4
+      with:
+        ref: main
+        sparse-checkout: ${{ env.PURPLE_PACKAGE_PATH }}
+        sparse-checkout-cone-mode: false
+
+    - name: 'Display directory content'
+      shell: bash
+      run: |
+        pwd
+        ls -l
+        cd ${{ env.PURPLE_PACKAGE_PATH }}
+        pwd
+        ls -l
+
+    - name: Setup Dotnet ${{ env.DOTNET_VERSION }} Environment
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: ${{ env.DOTNET_VERSION }}
+
+    - name: 'Resolve Project Dependencies Using Dotnet'
+      shell: pwsh
+      run: |
+        pushd './${{ env.PURPLE_PACKAGE_PATH }}'
+        dotnet build --configuration Release --output ./output
+        popd
+
+    - name: 'Run Azure Functions Action'
+      uses: Azure/functions-action@v1
+      id: fa
+      with:
+        app-name: ${{ env.PURPLE_FUNCTIONAPP_NAME }}
+        package: '${{ env.PURPLE_PACKAGE_PATH }}/output'
+        publish-profile: ${{ secrets.PURPLE_PUBLISH_PROFILE }}
+
+# For more samples to get started with GitHub Action workflows to deploy to Azure, refer to https://github.com/Azure/actions-workflow-samples
