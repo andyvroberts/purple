@@ -9,24 +9,24 @@ Create sets of UK Property Prices, grouped by Postcode, to be queried by a sampl
 The project has 3 components.  The Ingest folder is for data acquisition and populating price records at the postcode grouping.  The Server folder is for a data API that allows clients to retrieve price data based on a postcode lookup.  The Present folder contains a simple Web App which is the UX.  
 ```bash
 ├── ingest
-│   ├── file_scanner-py
+│   ├── file-scanner-py
 │   │   └── src (local price file scan using python cli)
 │   ├── queue-trigger-cs
 │   │   └── src (function app)
 │   └── queue-trigger-py
-│       └── src (function app)
+│       └── src (function app example)
 ├── platform
 │   └── az (bicep and azure cli files)
 ├── present
 └── serve
+    └── http-trigger-cs
+        └── src (function app)
 ```
-
-The ingest folder has 2 sub-folders. The 'local' one contains python code that runs locally.  The 'azure' one contains a Python function app.  
 
 
 ### 1. Ingest
 There are three components:  
-1. Create the Postode list as configuration
+1. Create the Postode list as configuration in Azure Table Storage
     - Run a Python function locally to Create a unique list of postcodes in the PPD file
     - Save the postcode list in a configuration table in Azure Table Storage
 2. Scan the PPD file for each postcode in the configuration
