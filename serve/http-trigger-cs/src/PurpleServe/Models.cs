@@ -1,6 +1,7 @@
 
 using Azure.Data.Tables;
 using Azure;
+using System.Runtime.Serialization;
 
 namespace PurpleServe
 {
@@ -23,16 +24,33 @@ namespace PurpleServe
     public class PriceAddress
     {
         // element [0]
-        public string? Address {get;set;}
+        public string? Address { get; set; }
         // element [1]
         public string? PriceDate { get; set; }
         // element [2]
-        public string? Price {get;set;}
+        public string? Price { get; set; }
         // element [3]
-        public string? Locality {get;set;}
+        public string? Locality { get; set; }
         // element [4]
-        public string? Town {get;set;}
+        public string? Town { get; set; }
         // element [6]
-        public string? County {get;set;}
+        public string? County { get; set; }
     }
+
+    /// <summary>
+    /// The Outcode table entity. 
+    /// Note, for example purposes, this table has one lowercase column name.
+    /// </summary>
+    public class OutcodeData : ITableEntity
+    {
+        public string? PartitionKey { get; set; }
+        public string? RowKey { get; set; }
+        public DateTimeOffset? Timestamp { get; set; }
+        public ETag ETag { get; set; }
+        public string? Status { get; set; }
+        public int? Count { get; set; }
+        [DataMember(Name = "postcodes")]
+        public string? Postcodes { get; set; }
+    }
+
 }

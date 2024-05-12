@@ -4,7 +4,7 @@ namespace PurpleServe
     public static class Mappers
     {
         /// <summary>
-        /// Create an extension method on the PriceData for mapping purposes.
+        /// Create an extension method on the PriceData for mapping inputs (model) to outputs (DTO).
         /// </summary>
         /// <param name="pd">An Azure Table Storage PriceData Record</param>
         /// <returns></returns>
