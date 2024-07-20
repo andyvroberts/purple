@@ -1,4 +1,4 @@
-name: Deploy C# Queue Trigger Function App
+name: Deploy Purple Function App (C#)
 
 # only run for ingest function app code changes 
 on:

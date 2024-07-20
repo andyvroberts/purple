@@ -6,56 +6,35 @@ Create sets of UK Property Prices, grouped by Postcode, to be queried by a sampl
 
 
 ## Project Structure  
-The project has 3 components.  The Ingest folder is for data acquisition and populating price records at the postcode grouping.  The Server folder is for a data API that allows clients to retrieve price data based on a postcode lookup.  The Present folder contains a simple Web App which is the UX.  
+The project has 4 components.  The ingest folder is for data acquisition and organising price records at the postcode grouping.  The PurpleFuncs folder is for the Azure functions that store prices and also allows clients to retrieve price data based on a postcode lookup.  The app folder contains a simple Web App which is the UX. Finally, the platform folder contains the Bicep IaC.  
 ```bash
+├── app
+│   └── src (javascript & css)
 ├── ingest
-│   ├── file-scanner-py
-│   │   └── src (local price file scan using python cli)
-│   ├── queue-trigger-cs
-│   │   └── src (function app)
-│   └── queue-trigger-py
-│       └── src (function app example)
+│   └── file-scanner-py
+│       └── src (local price file scan using python)
 ├── platform
-│   └── az (bicep and azure cli files)
-├── present
-└── serve
-    └── http-trigger-cs
-        └── src (function app)
+│   └── PurpleFunc (bicep and azure cli files)
+│       └── 01-app-insights
+│       └── 02-purple-funcs
+└── PurpleFuncs (C# functionapp code)
 ```
 
+### 1. App
 
-### 1. Ingest
-There are three components:  
-1. Create the Postode list as configuration in Azure Table Storage
-    - Run a Python function locally to Create a unique list of postcodes in the PPD file
-    - Save the postcode list in a configuration table in Azure Table Storage
-2. Scan the PPD file for each postcode in the configuration
-    - Read the configuration for the next postcode to process
-    - Run a Python function locally to search the full PPD file and group the property prices for each address into a single dataset
-    - Store the dataset in an Azure Storage Queue for later processing
-3. Load the Postcode dataset into a Database
-    - Create an Azure Storage Table to contain property prices.  Partition by Postcode and Address
-    - Create an Azure Function to read Queue messages and insert the prices into the Table
+
+### 2. Ingest
+Locally run Python modules perform 2 functions:  
+1. Create a list of postcodes available in the PPD file.
+2. Per outcode, push each postcode set of prices to an Azure queue.
+
+### 3. Platform
+
+
+### 4. PurpleFuncs
 
 <br>
 
-```mermaid
-%%{init: {'theme':'dark'}}%%
-flowchart TD;
-    subgraph Scanner[Scan PPD Locally]
-        direction LR
-        Scan[Scan PPD] --> Extract[Extract Unique Postcodes] --> Store[Save in Configuration]
-    end;
-    subgraph Reader[Read PPD Locally]
-        direction LR
-        Next[Get Next Postcode] --> Search[Read PPD] --> Group[Group by Postcode] --> Queue[Add to Queue]
-    end;
-    subgraph Loader[Load Prices using Azure Functions]
-        direction LR
-        Dequeue[Pop Message] --> Insert[Insert into Table] --> Config[Mark Config Done] 
-    end;
-    Scanner --> Reader --> Loader
-```
 
 
 
