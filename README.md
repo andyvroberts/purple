@@ -2,7 +2,7 @@
 Requirement:  
 Create sets of UK Property Prices, grouped by Postcode, to be queried by a sample web application.  
 
-[![Deploy Queue Trigger Azure Function App](https://github.com/andyvroberts/purple/actions/workflows/funcapp.qt.cs.deploy.yml/badge.svg)](https://github.com/andyvroberts/purple/actions/workflows/funcapp.qt.cs.deploy.yml)
+[![Deploy Purple Function App (C#)](https://github.com/andyvroberts/purple/actions/workflows/funcapp.deploy.yml/badge.svg)](https://github.com/andyvroberts/purple/actions/workflows/funcapp.deploy.yml)
 
 
 ## Project Structure  
