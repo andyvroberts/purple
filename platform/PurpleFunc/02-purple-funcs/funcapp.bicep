@@ -6,9 +6,9 @@ param projShortName string
 param projVersion string 
 param storageName string
 
-var hostPlanName = '${projShortName}QTrggrFarm${projVersion}'
+var hostPlanName = '${projShortName}Farm${projVersion}'
 var insightsName = '${projShortName}Insights${projVersion}'
-var functionName = '${projShortName}QTrggrFunc${projVersion}'
+var functionName = '${projShortName}Funcs${projVersion}'
 
 // Get a reference to the seperate configuration storage account (table storage)
 resource storageAccount 'Microsoft.Storage/storageAccounts@2019-06-01' existing = {

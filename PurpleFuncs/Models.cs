@@ -1,10 +1,10 @@
-
 using Azure.Data.Tables;
 using Azure;
 using System.Runtime.Serialization;
 
-namespace PurpleServe
+namespace PurpleFuncs
 {
+    // Common Entities
 
     public class PriceData : ITableEntity
     {
@@ -14,6 +14,8 @@ namespace PurpleServe
         public ETag ETag { get; set; }
         public string? Addresses { get; set; }
     }
+
+    // HTTP Data Server Entities
 
     public class PriceResult
     {
@@ -51,6 +53,20 @@ namespace PurpleServe
         public int? Count { get; set; }
         [DataMember(Name = "postcodes")]
         public string? Postcodes { get; set; }
+    }
+
+
+    // Queue Trigger Entities
+
+    public class Prices
+    {
+        public string? Postcode { get; set; }
+        public List<Addresses>? PostcodePrices { get; set; }
+    }
+
+    public class Addresses
+    {
+        public string? AdddressRow { get; set; }
     }
 
 }

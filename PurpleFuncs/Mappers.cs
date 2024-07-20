@@ -1,5 +1,4 @@
-
-namespace PurpleServe
+namespace PurpleFuncs
 {
     public static class Mappers
     {

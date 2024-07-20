@@ -1,8 +1,8 @@
 {
   "profiles": {
-    "PurpleServe": {
+    "PurpleFuncs": {
       "commandName": "Project",
-      "commandLineArgs": "--port 7041",
+      "commandLineArgs": "--port 7000",
       "launchBrowser": false
     }
   }

@@ -1,2 +1,0 @@
-paramFile=funcapp.params.json
-az deployment group create --resource-group Purple001 --template-file funcapp.bicep --parameters $paramFile

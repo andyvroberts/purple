@@ -6,7 +6,7 @@ on:
     branches:
     - main
     paths:
-    - 'ingest/queue-trigger-cs/src/PurpleIngest/**'
+    - 'PurpleFuncs/**'
 
 # CONFIGURATION
 # Create the empty Azure Function App FIRST 
@@ -18,8 +18,8 @@ on:
 #
 # 2. Change these variables for your configuration:
 env:
-  PURPLE_FUNCTIONAPP_NAME: 'PurpleQTrggrFunc001' 
-  PURPLE_PACKAGE_PATH: 'ingest/queue-trigger-cs/src/PurpleIngest/' 
+  PURPLE_FUNCTIONAPP_NAME: 'PurpleFuncs001' 
+  PURPLE_PACKAGE_PATH: 'PurpleFuncs/' 
   DOTNET_VERSION: '8.0.x' 
 
 jobs:
