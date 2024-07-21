@@ -44,7 +44,7 @@ title: Virtual DOM
 classDiagram
     
     class App["App()"] {
-        props: - state
+        - state
     }
     class Fragment["Fragment()"]{
     }
@@ -52,19 +52,18 @@ classDiagram
         - Text: Price Search
     }
     class ApiInput["AskAPI()"]{
-        props: - state
+        - state
     }
     class PostcodeInput["AskPostcode()"]{
-        props: - state
+        - state
     }
     class PriceList["ShowPrices()"]{
-        props: - state
+        - state
     }
     class UnorderedPrices["< ul >"]{
         - price list
     }
     class Price["Price Item"]{
-        - props:
         - amount
         - address
     }
