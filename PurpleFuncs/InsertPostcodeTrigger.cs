@@ -21,7 +21,7 @@ namespace PurpleFuncs
             if (msg.MessageText != null)
             {
                 decimal msgLen = msg.MessageText.Length;
-                var lenKb = Math.Round(msgLen, 2, MidpointRounding.ToEven);
+                var lenKb = Math.Round(msgLen/1024, 2, MidpointRounding.ToEven);
                 var msgParts = msg.MessageText.Split('~');
                 var postcode = msgParts[0];
                 var addressString = msgParts[1];
