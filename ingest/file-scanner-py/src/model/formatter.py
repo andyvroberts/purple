@@ -38,6 +38,7 @@ def outcode_mapping(outcode, postcodes):
 
     return new_rec
 
+
 #---------------------------------------------------------------------------------------#
 def compact_price_rec(price_dict):
     """ compact the input price record which is a dict.
@@ -55,6 +56,7 @@ def compact_price_rec(price_dict):
         f"{price_dict['PropertyType']}|{price_dict['NewBuild']}|{price_dict['Duration']}"
     )
 
+
 # ---------------------------------------------------------------------------------------#
 def format_address(paon, saon, street):
     """join the parts of the record that form the unique address component.
@@ -64,14 +66,15 @@ def format_address(paon, saon, street):
     """
     address_seq = []
     if paon:
-        address_seq.append(saon)
-    if saon:
         address_seq.append(paon)
+    if saon:
+        address_seq.append(saon)
     if street:
         address_seq.append(street)
 
     address_string = ' '.join(address_seq)
     return address_string.strip()
+
 
 # ---------------------------------------------------------------------------------------#
 def price_list_to_queue_string(postcode, price_list):
@@ -83,3 +86,15 @@ def price_list_to_queue_string(postcode, price_list):
     """
     price_string = ('#'.join(str(x) for x in price_list))
     return f"{postcode}~{price_string}"
+
+
+# ---------------------------------------------------------------------------------------#
+def price_list_to_table_string(price_list):
+    """convert the dict into a long string to be inserted into a table
+        Args:   
+            price_list: one or more compact price records in a list
+            Return: the table prices string
+    """
+    price_string = ('#'.join(str(x) for x in price_list))
+    return price_string
+

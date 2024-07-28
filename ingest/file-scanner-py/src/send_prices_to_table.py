@@ -8,21 +8,25 @@ from collections import defaultdict
 from logging.handlers import RotatingFileHandler
 from itertools import groupby
 from azu import table_storage as tab
-from azu import queue_storage as que
 from model import formatter as fmt
 from model import decoder as dcdr
 
 
-log = logging.getLogger("purple.v2.src.local.postcode_prices")
+log = logging.getLogger("purple.v2.src.local.send_prices_to_table")
 #------------------------------------------------------------------------------
 def controller():
     """
         Orchestrate the process from the command line args.
+        1. Read the ready outcodes to process
+        2. Scan the prices file for all postcode prices in the outcode
+        3. format each postcode payload and load it into the prices table directly
+        4. Mark the ready outcode as completed.
 
         Args: None
     """
     log.info("-------------------------------------------------------------------")
     start_exec = time.time()
+    done = 0
 
     latest = 'http://prod.publicdata.landregistry.gov.uk.s3-website-eu-west-1.amazonaws.com/pp-complete.csv'
     log.debug(f'executing from path {os.getcwd()}')
@@ -35,13 +39,13 @@ def controller():
         data_path = args.localfile
         from ukio.file_reader import stream_file as rdr
 
-    tab_client = tab.get_table_client("outcode")
-    queue_client = que.get_base64_queue_client("prices")
+    outcode_client = tab.get_table_client("outcode")
+    postcode_client = tab.get_table_client("prices")
 
-    outcodes, postcodes = fetch_ready_postcodes(tab_client)
+    outcodes, postcodes = fetch_ready_postcodes(outcode_client)
     pc_list = fetch_prices(rdr, data_path, postcodes)
-    sort_and_push(queue_client, pc_list)
-    done = deactivate_outcodes(tab_client, outcodes)
+    sort_and_store(postcode_client, pc_list)
+    #done = deactivate_outcodes(outcode_client, outcodes)
 
     log.info(f"Completed {done} Outcodes.")
 
@@ -108,23 +112,65 @@ def fetch_prices(reader, data_path, postcodes):
 
 
 #---------------------------------------------------------------------------------------#
-def sort_and_push(cl2, postcode_set):
+def sort_and_store(cl2, postcode_list):
     """
-        for each set of prices belonging to a single postcode, create a queue message
+        for each set of prices belonging to a single postcode, store in the table.
 
         Args:
             return: a list of postcodes
     """
-    s = 0
+    batch, batches, total = 0, 0, 0
+    table_batch = []
+    prev_outcode = str
 
-    for k, v in postcode_set.items():
-        entry = fmt.price_list_to_queue_string(k, v)
-        que.send_price_message(cl2, entry, s)
-        s+=60
+    for k, v in postcode_list.items():
+        batch += 1
+        new_outcode, table_rec = format_price_table_rec(k, v)
+        log.debug(f"Previous outcode = {prev_outcode}, New Outcode = {new_outcode}. Batch size: {len(table_batch)}.")
 
-    #for entry in sorted(postcode_set.items(), key=lambda x:x):
-    #    que.send_price_message(cl2, entry, s)
-    #    s+=300
+
+        if prev_outcode != new_outcode:
+            if len(table_batch) > 0:
+                total += tab.upsert_replace_batch(cl2, table_batch)
+                table_batch = []
+                batches += 1
+                batch = 0
+            prev_outcode = new_outcode
+
+        table_batch.append(table_rec)
+
+        if batch == 100:
+            total += tab.upsert_replace_batch(cl2, table_batch)
+            table_batch = []
+            batches += 1
+            batch = 0
+
+    # insert the final entities that did not reach the batch limit
+    if len(table_batch) > 0:
+        total += tab.upsert_replace_batch(cl2, table_batch)
+        batches += 1
+
+    log.info(f"Inserted {batches} price table batches for {total} postcodes.")
+
+
+# ---------------------------------------------------------------------------------------#
+def format_price_table_rec(postcode, prices):
+    """convert a list of postcode prices into a table record that can be stored
+        Args:   
+            postcode: the postcode of prices to be stored
+            prices: one or more compact price records in a list
+            Return: a storage table record
+    """
+    rec = {}
+
+    outcode = postcode.split(' ')[0]
+    entry = fmt.price_list_to_table_string(prices)
+    
+    rec['PartitionKey'] = outcode
+    rec['RowKey'] = postcode
+    rec['Addresses'] = entry
+
+    return outcode, rec
 
 
 #---------------------------------------------------------------------------------------#
@@ -150,6 +196,7 @@ def deactivate_outcodes(cl1, outcode_list):
 
     return updated_count
 
+
 #---------------------------------------------------------------------------------------#
 def parse_command_line():
     """Identify flags and values passed into execution
@@ -168,7 +215,8 @@ if __name__ == '__main__' :
         format="%(asctime)s %(levelname)-8s [%(name)s]: %(message)s",
         datefmt='%Y-%m-%d %I:%M:%S',
         handlers = [
-            logging.StreamHandler(sys.stdout)
+            logging.StreamHandler(sys.stdout),
+            RotatingFileHandler('./send_prices_to_table.log', maxBytes=10240, backupCount=10)
         ]
     )
 
