@@ -59,6 +59,9 @@ coverage.xml
 *.mo
 *.pot
 
+# rotating file handlers
+*.log.*
+
 # Django stuff:
 *.log
 local_settings.py

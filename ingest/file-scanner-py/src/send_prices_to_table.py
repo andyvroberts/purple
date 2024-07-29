@@ -4,9 +4,10 @@ import time
 import os
 import sys
 
-from collections import defaultdict
+from operator import attrgetter
+from collections import namedtuple, defaultdict
+
 from logging.handlers import RotatingFileHandler
-from itertools import groupby
 from azu import table_storage as tab
 from model import formatter as fmt
 from model import decoder as dcdr
@@ -45,7 +46,7 @@ def controller():
     outcodes, postcodes = fetch_ready_postcodes(outcode_client)
     pc_list = fetch_prices(rdr, data_path, postcodes)
     sort_and_store(postcode_client, pc_list)
-    #done = deactivate_outcodes(outcode_client, outcodes)
+    done = deactivate_outcodes(outcode_client, outcodes)
 
     log.info(f"Completed {done} Outcodes.")
 
@@ -88,8 +89,9 @@ def fetch_prices(reader, data_path, postcodes):
             postcodes: a list of postcodes for the price records to fetch
             return: Count of records processed
     """
+    Price = namedtuple('Price', ['outcode', 'postcode', 'addresses'])
     all_prices = defaultdict(list)
-    price_ix = 0
+    included_count = 0
 
     # read all postcodes and put into a list.
     for file_rec in reader(data_path):
@@ -100,14 +102,9 @@ def fetch_prices(reader, data_path, postcodes):
         if pc in postcodes:
             compact_rec = fmt.compact_price_rec(rec)
             all_prices[pc].append(compact_rec)
-            price_ix += 1
+            included_count += 1
 
-    #for k, v in all_prices.items():
-        #log.info(fmt.price_list_to_queue_string(k, v))
-        #log.info(f"Postcode = {k} has {len(v)} prices.")
-        #if k ==  "B2 5UG":
-        #    log.info(f"{k} = {v}")
-    log.debug(f"Retrieved {price_ix} prices")
+    log.info(f"Included {included_count} CSV price records.")
     return all_prices
 
 
@@ -121,13 +118,12 @@ def sort_and_store(cl2, postcode_list):
     """
     batch, batches, total = 0, 0, 0
     table_batch = []
-    prev_outcode = str
+    prev_outcode = 'no outcode'
 
-    for k, v in postcode_list.items():
+    for k, v in sorted(postcode_list.items()):
         batch += 1
         new_outcode, table_rec = format_price_table_rec(k, v)
-        log.debug(f"Previous outcode = {prev_outcode}, New Outcode = {new_outcode}. Batch size: {len(table_batch)}.")
-
+        log.debug(f"Previous outcode = {prev_outcode}, New Outcode = {new_outcode}. Current batch size: {len(table_batch)}.")
 
         if prev_outcode != new_outcode:
             if len(table_batch) > 0:
@@ -211,7 +207,7 @@ def parse_command_line():
 #------------------------------------------------------------------------------
 if __name__ == '__main__' :
     logging.basicConfig(
-        level=logging.DEBUG,
+        level=logging.INFO,
         format="%(asctime)s %(levelname)-8s [%(name)s]: %(message)s",
         datefmt='%Y-%m-%d %I:%M:%S',
         handlers = [
