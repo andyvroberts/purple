@@ -216,7 +216,7 @@ if __name__ == '__main__' :
         datefmt='%Y-%m-%d %I:%M:%S',
         handlers = [
             logging.StreamHandler(sys.stdout),
-            RotatingFileHandler('./send_prices_to_table.log', maxBytes=10240, backupCount=10)
+            RotatingFileHandler('./send_prices_to_table.log', maxBytes=10240, backupCount=0)
         ]
     )
 
